@@ -77,7 +77,6 @@
     <Compile Include="BpmsOrchestrationOutput.cs" />
     <Compile Include="BpmsOrchestrationInput.cs" />
     <Compile Include="BpmsOrchestration.cs" />
-    <Compile Include="IDictionary.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SimpleBpmsWorker.cs" />
   </ItemGroup>

@@ -6,7 +6,6 @@
     public class BpmsFlow
     {
         public IDictionary<int, BpmsNode> NodeMap;
-        public BpmsNode RootNode;
         public IDictionary<string, object> InputParameters;
     }
 
@@ -14,7 +13,7 @@
     {
         public int Id;
         public BpmsTask Task;
-        public IList<BpmsTask> ChildTasks;
+        public IList<int> ChildTasksIds;
     }
 
     public class BpmsTask

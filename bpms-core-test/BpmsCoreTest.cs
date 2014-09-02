@@ -6,10 +6,15 @@
     using System.Collections.Generic;
     using Newtonsoft.Json;
     using System.IO;
+    using System.Threading;
 
     [TestClass]
     public class BpmsCoreTest
     {
+
+        public const string ServiceBusConnectionString = "Endpoint=sb://bpmsdemo.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=QIpu3lnEeB0LFbp3N+tIAt70FS97TrpKb1OKUaqUY4E=";
+        public const string StorageConnectionString = "UseDevelopmentStorage=true;";
+
         [TestMethod]
         public void TestBpmsFlow()
         {
@@ -25,6 +30,11 @@
 
             File.WriteAllText("c:\\workshop\\serialized.json", 
                 JsonConvert.SerializeObject(flow, Formatting.Indented));
+
+            SimpleBpmsWorker bpmsWorker = new SimpleBpmsWorker(ServiceBusConnectionString, StorageConnectionString);
+            bpmsWorker.Start();
+            //Thread.Sleep(60000);
+            bpmsWorker.Stop();
         }
     }
 }

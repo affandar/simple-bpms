@@ -59,7 +59,7 @@
                 storageConnectionString,
                 workerSettings);
 
-            //this.taskHubWorker.AddTaskOrchestrations(ProvisioningOrchestrationMetadata.OrchestrationCreators);
+            this.taskHubWorker.AddTaskOrchestrations(typeof(BpmsOrchestration));
             //this.taskHubWorker.AddTaskActivitiesFromInterface(storageAccountResourceManager, true);
         }
 
@@ -67,6 +67,11 @@
         {
             this.taskHubWorker.CreateHubIfNotExists();
             this.taskHubWorker.Start();
+        }
+
+        public Task<OrchestrationInstance> CreateBpmsFlowInstanceAsync(BpmsOrchestrationInput input)
+        {
+            return this.taskHubClient.CreateOrchestrationInstanceAsync(typeof(BpmsOrchestration), input);
         }
 
         public void Stop()

@@ -2,11 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
-namespace bpms_core
+namespace Simple.Bpms
 {
-    public class Class1
+    class IDictionary<T>
     {
     }
 }

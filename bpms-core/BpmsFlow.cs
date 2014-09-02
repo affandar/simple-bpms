@@ -28,4 +28,25 @@
     //public class BpmsTaskMetadata
     //{
     //}
+
+    // TODO : these might come in handy..
+    //public class BpmsTaskInput
+    //{
+    //    readonly IDictionary<string, object> Data;
+
+    //    public BpmsTaskInput()
+    //    {
+    //        this.Data = new Dictionary<string, object>();
+    //    }
+    //}
+
+    //public class BpmsTaskOutput
+    //{
+    //    readonly IDictionary<string, object> Data;
+
+    //    public BpmsTaskOutput()
+    //    {
+    //        this.Data = new Dictionary<string, object>();
+    //    }
+    //}
 }

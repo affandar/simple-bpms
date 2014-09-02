@@ -7,6 +7,8 @@
     using Newtonsoft.Json;
     using System.IO;
     using System.Threading;
+    using System.Threading.Tasks;
+    using Microsoft.ServiceBus.DurableTask;
 
     [TestClass]
     public class BpmsCoreTest
@@ -16,7 +18,7 @@
         public const string StorageConnectionString = "UseDevelopmentStorage=true;";
 
         [TestMethod]
-        public void TestBpmsFlow()
+        public async Task TestBpmsFlow()
         {
             BpmsFlow flow = new BpmsFlow();
 
@@ -33,7 +35,13 @@
 
             SimpleBpmsWorker bpmsWorker = new SimpleBpmsWorker(ServiceBusConnectionString, StorageConnectionString);
             bpmsWorker.Start();
-            //Thread.Sleep(60000);
+            
+            BpmsOrchestrationInput input = new BpmsOrchestrationInput();
+            input.Flow = flow;
+
+            OrchestrationInstance instance = await bpmsWorker.CreateBpmsFlowInstanceAsync(input);
+
+            Thread.Sleep(5000);
             bpmsWorker.Stop();
         }
     }

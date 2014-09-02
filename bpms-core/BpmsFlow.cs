@@ -6,13 +6,15 @@
     public class BpmsFlow
     {
         public IDictionary<int, BpmsNode> NodeMap;
-        public IDictionary<string, object> InputParameters;
+        public IList<string> InputParameters;
     }
 
+    // TODO : out variable maping as well
     public class BpmsNode
     {
         public int Id;
         public BpmsTask Task;
+        public IDictionary<string, string> InputParameterBindings;
         public IList<int> ChildTasksIds;
     }
 
@@ -20,7 +22,7 @@
     {
         public string TaskName;
         public string TaskVersion;
-        public IDictionary<string, object> InputParameters;
+        public IList<string> InputParameters;
     }
 
     // TODO : OM to capture what we show in the designer toolbox etc.

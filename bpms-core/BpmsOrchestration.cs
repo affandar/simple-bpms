@@ -8,12 +8,12 @@
 
     public class BpmsOrchestration : TaskOrchestration<BpmsOrchestrationOutput, BpmsOrchestrationInput>
     {
-        IDictionary<string, object> processVariables;
+        IDictionary<string, string> processVariables;
         IDictionary<int, BpmsNode> nodeMap;
 
         public override async Task<BpmsOrchestrationOutput> RunTask(OrchestrationContext context, BpmsOrchestrationInput input)
         {
-            this.processVariables = new Dictionary<string, object>();
+            this.processVariables = new Dictionary<string, string>();
             this.nodeMap = input.Flow.NodeMap;
             
             BpmsNode rootNode = null;
@@ -33,8 +33,8 @@
             if (node != null)
             {
                 // TODO : check if the type is a logical or conditional operator then evaluate in place and proceed
-                var output = await context.ScheduleTask<IDictionary<string, object>>(
-                    node.Task.TaskName, node.Task.TaskVersion, this.ExpandBpmsTaskInputParameters(node.Task.InputParameters));
+                var output = await context.ScheduleTask<IDictionary<string, string>>(
+                    node.Task.TaskName, node.Task.TaskVersion, this.ExpandBpmsTaskInputParameters(node.InputParameterBindings));
 
                 if (output != null && output.Count > 0)
                 {
@@ -60,15 +60,35 @@
             }
         }
 
-        void InjectProcessVariables(int nodeId, IDictionary<string, object> variables)
+        void InjectProcessVariables(int nodeId, IDictionary<string, string> variables)
         {
-            // TODO
+            // TODO : add namespacing to the injected vars, for now we only have one global scope
+            if(variables != null)
+            {
+                variables.Select(v => this.processVariables[v.Key] = v.Value);
+            }
         }
 
         // grab values from process variables if required
-        IDictionary<string, object> ExpandBpmsTaskInputParameters(IDictionary<string, object> specifiedParameters)
+        IDictionary<string, string> ExpandBpmsTaskInputParameters(IDictionary<string, string> specifiedParameters)
         {
-            // TODO
+            // TODO 
+            if(specifiedParameters != null)
+            {
+                IDictionary<string, string> clonedSpecifiedParameters = new Dictionary<string, string>(specifiedParameters);
+                foreach(var kvp in clonedSpecifiedParameters)
+                {
+                    // explicitly set value overrides process variables
+                    if (kvp.Value == null)
+                    {
+                        string value = null;
+                        if (this.processVariables.TryGetValue(kvp.Key, out value))
+                        {
+                            specifiedParameters[kvp.Key] = value;
+                        }
+                    }
+                }
+            }
             return specifiedParameters;
         }
     }

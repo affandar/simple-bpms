@@ -60,13 +60,18 @@
                 workerSettings);
 
             this.taskHubWorker.AddTaskOrchestrations(typeof(BpmsOrchestration));
-            //this.taskHubWorker.AddTaskActivitiesFromInterface(storageAccountResourceManager, true);
         }
 
         public void Start()
         {
             this.taskHubWorker.CreateHubIfNotExists();
             this.taskHubWorker.Start();
+        }
+
+        public void RegisterBpmsTaskActivity(string name, string version, Type taskActivityType)
+        {
+            NameValueObjectCreator<TaskActivity> objectCreator = new NameValueObjectCreator<TaskActivity>(name, version, taskActivityType);
+            this.taskHubWorker.AddTaskActivities(objectCreator);
         }
 
         public Task<OrchestrationInstance> CreateBpmsFlowInstanceAsync(BpmsOrchestrationInput input)
@@ -76,7 +81,8 @@
 
         public void Stop()
         {
-            this.taskHubWorker.Stop();
+            // TODO : graceful exit
+            this.taskHubWorker.Stop(true);
         }
     }
 }

@@ -4,6 +4,6 @@
 
     public class BpmsOrchestrationOutput
     {
-        public IDictionary<string, object> OutputParameters;
+        public IDictionary<string, string> OutputParameters;
     }
 }

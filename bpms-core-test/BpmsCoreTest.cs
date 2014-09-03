@@ -9,6 +9,7 @@
     using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.ServiceBus.DurableTask;
+    using System.Diagnostics;
 
     [TestClass]
     public class BpmsCoreTest
@@ -75,9 +76,7 @@
                 { node1.Id, node1 } 
             };
 
-            //File.WriteAllText("c:\\workshop\\serialized.json", 
-            //    JsonConvert.SerializeObject(flow, Formatting.Indented));
-
+            
             SimpleBpmsWorker bpmsWorker = new SimpleBpmsWorker(ServiceBusConnectionString, StorageConnectionString);
             bpmsWorker.RegisterBpmsTaskActivity("SentimentAnalyzerTask", "1.0", typeof(SentimentAnalyzerTask));
             bpmsWorker.RegisterBpmsTaskActivity("ProcessSentimentTask", "1.0", typeof(ProcessSentimentTask));
@@ -85,11 +84,53 @@
             
             BpmsOrchestrationInput input = new BpmsOrchestrationInput();
             input.Flow = flow;
+            input.InputParameterBindings =
+                new Dictionary<string, string>() 
+                { 
+                    {
+                      "input_text", "this is my sentiment" 
+                    }
+                };
+
+           File.WriteAllText("c:\\workshop\\serialized.json", 
+                JsonConvert.SerializeObject(flow, Formatting.Indented));
 
             OrchestrationInstance instance = await bpmsWorker.CreateBpmsFlowInstanceAsync(input);
 
-            Thread.Sleep(5000);
+            OrchestrationState state = WaitForOrchestration(bpmsWorker, instance, TimeSpan.FromMinutes(1), 
+                s => s.OrchestrationStatus != OrchestrationStatus.Running);
+
             bpmsWorker.Stop();
         }
+
+        protected static OrchestrationState WaitForOrchestration(SimpleBpmsWorker worker, OrchestrationInstance orchestrationInstance,
+            TimeSpan timeout,
+            Func<OrchestrationState, bool> waitCheck)
+        {
+            var sw = new Stopwatch();
+            sw.Start();
+            OrchestrationState result = null;
+            double timeoutInMillisecs = timeout.TotalMilliseconds;
+
+            while (sw.ElapsedMilliseconds < timeoutInMillisecs)
+            {
+                Thread.Sleep(TimeSpan.FromSeconds(1));
+                result = worker.GetOrchestrationStateAsync(orchestrationInstance).Result;
+                if (result != null)
+                {
+                    if (waitCheck(result))
+                    {
+                        break;
+                    }
+                }
+                else if (sw.Elapsed >= TimeSpan.FromMinutes(2))
+                {
+                    throw new InvalidOperationException("Orchestration was not started within 2 minutes");
+                }
+            }
+
+            return result;
+        }
+
     }
 }

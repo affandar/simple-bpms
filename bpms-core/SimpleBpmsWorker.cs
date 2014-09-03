@@ -64,7 +64,8 @@
 
         public void Start()
         {
-            this.taskHubWorker.CreateHubIfNotExists();
+            //this.taskHubWorker.CreateHubIfNotExists();
+            this.taskHubWorker.CreateHub();
             this.taskHubWorker.Start();
         }
 
@@ -77,6 +78,11 @@
         public Task<OrchestrationInstance> CreateBpmsFlowInstanceAsync(BpmsOrchestrationInput input)
         {
             return this.taskHubClient.CreateOrchestrationInstanceAsync(typeof(BpmsOrchestration), input);
+        }
+
+        public Task<OrchestrationState> GetOrchestrationStateAsync(OrchestrationInstance instance)
+        {
+            return this.taskHubClient.GetOrchestrationStateAsync(instance);
         }
 
         public void Stop()

@@ -14,6 +14,9 @@
         public override async Task<BpmsOrchestrationOutput> RunTask(OrchestrationContext context, BpmsOrchestrationInput input)
         {
             this.processVariables = new Dictionary<string, string>();
+            
+            // input becomes the global process variables we begin with
+            this.InjectProcessVariables(-1, input.InputParameterBindings);
             this.nodeMap = input.Flow.NodeMap;
             
             BpmsNode rootNode = null;
@@ -65,27 +68,26 @@
             // TODO : add namespacing to the injected vars, for now we only have one global scope
             if(variables != null)
             {
-                variables.Select(v => this.processVariables[v.Key] = v.Value);
+                foreach(var kvp in variables)
+                {
+                    this.processVariables[kvp.Key] = kvp.Value;
+                }
             }
         }
 
         // grab values from process variables if required
         IDictionary<string, string> ExpandBpmsTaskInputParameters(IDictionary<string, string> specifiedParameters)
         {
-            // TODO 
             if(specifiedParameters != null)
             {
                 IDictionary<string, string> clonedSpecifiedParameters = new Dictionary<string, string>(specifiedParameters);
-                foreach(var kvp in clonedSpecifiedParameters)
+
+                // TODO : very ugly but gets the job done for now
+                foreach(var kvp in this.processVariables)
                 {
-                    // explicitly set value overrides process variables
-                    if (kvp.Value == null)
+                    foreach(var paramKvp in clonedSpecifiedParameters)
                     {
-                        string value = null;
-                        if (this.processVariables.TryGetValue(kvp.Key, out value))
-                        {
-                            specifiedParameters[kvp.Key] = value;
-                        }
+                        specifiedParameters[paramKvp.Key] = paramKvp.Value.Replace("%" + kvp.Key + "%", kvp.Value);
                     }
                 }
             }

@@ -98,10 +98,12 @@
                 { node3.Id, node3 } 
             };
 
-            
-            SimpleBpmsWorker bpmsWorker = new SimpleBpmsWorker(ServiceBusConnectionString, StorageConnectionString);
-            bpmsWorker.RegisterBpmsTaskActivity("SentimentAnalyzerTask", "1.0", typeof(SentimentAnalyzerTask));
-            bpmsWorker.RegisterBpmsTaskActivity("ProcessSentimentTask", "1.0", typeof(ProcessSentimentTask));
+
+            BpmsRepository repository = new BpmsRepository(string.Empty);
+            repository.AddConnector("SentimentAnalyzerTask", "1.0", typeof(SentimentAnalyzerTask));
+            repository.AddConnector("ProcessSentimentTask", "1.0", typeof(ProcessSentimentTask));
+
+            SimpleBpmsWorker bpmsWorker = new SimpleBpmsWorker(repository, ServiceBusConnectionString, StorageConnectionString);
             bpmsWorker.Start();
             
             BpmsOrchestrationInput input = new BpmsOrchestrationInput();

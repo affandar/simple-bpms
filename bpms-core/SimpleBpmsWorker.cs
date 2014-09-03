@@ -24,11 +24,13 @@
 
         readonly TaskHubClient taskHubClient;
         readonly TaskHubWorker taskHubWorker;
+        readonly BpmsRepository repository;
 
         const string HubName = "SimpleBpms";
         
-        public SimpleBpmsWorker(string serviceBusConnectionString, string storageConnectionString)
+        public SimpleBpmsWorker(BpmsRepository repository, string serviceBusConnectionString, string storageConnectionString)
         {
+            this.repository = repository;
             var taskHubClientSettings = new TaskHubClientSettings();
             taskHubClientSettings.MessageCompressionSettings = new CompressionSettings
             {
@@ -65,14 +67,20 @@
         public void Start()
         {
             //this.taskHubWorker.CreateHubIfNotExists();
+            
+            foreach (var connector in this.repository.GetConnectors())
+            {
+                var taskFactory = connector.CreateFactory();
+                this.taskHubWorker.AddTaskActivities(taskFactory);
+            }
+
             this.taskHubWorker.CreateHub();
             this.taskHubWorker.Start();
         }
 
         public void RegisterBpmsTaskActivity(string name, string version, Type taskActivityType)
         {
-            NameValueObjectCreator<TaskActivity> objectCreator = new NameValueObjectCreator<TaskActivity>(name, version, taskActivityType);
-            this.taskHubWorker.AddTaskActivities(objectCreator);
+            this.repository.AddConnector(name, version, taskActivityType.Assembly.FullName, taskActivityType.FullName);
         }
 
         public Task<OrchestrationInstance> CreateBpmsFlowInstanceAsync(BpmsOrchestrationInput input)

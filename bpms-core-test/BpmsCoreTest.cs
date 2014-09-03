@@ -53,18 +53,38 @@
                 {
                     { "text", "%input_text%"}
                 },
-                ChildTasksIds = new List<int>() { 1 }
+                ChildTaskIds = new List<int> { 1 }
             };
 
-            BpmsNode node1 = new BpmsNode 
+            BpmsNode node1 = new BpmsNode
+            {
+                Id = 1,
+                ChildTaskIds = new List<int> { 2, 3 },
+                ChildTaskSelectors = new Dictionary<int, Predicate>() 
+                { 
+                    { 2, new Predicate("sentiment_score", ConditionOperator.GTE, "5") },
+                    { 3, new Predicate("sentiment_score", ConditionOperator.GTE, "3") },
+                }
+            };
+
+            BpmsNode node2 = new BpmsNode 
             { 
-                Id = 1, 
+                Id = 2, 
                 Task = processSentimentTask,
                 InputParameterBindings = new Dictionary<string, string>()
                 {
                     { "sentiment", "%sentiment_score%"}
                 },
-                ChildTasksIds = null 
+            };
+
+            BpmsNode node3 = new BpmsNode
+            {
+                Id = 3,
+                Task = processSentimentTask,
+                InputParameterBindings = new Dictionary<string, string>()
+                {
+                    { "sentiment", "%sentiment_score%"}
+                },
             };
             
             // bpms flow that is a container for the bpms nodes
@@ -73,7 +93,9 @@
             flow.NodeMap = new Dictionary<int, BpmsNode>() 
             { 
                 { node0.Id, node0 }, 
-                { node1.Id, node1 } 
+                { node1.Id, node1 },
+                { node2.Id, node2 },
+                { node3.Id, node3 } 
             };
 
             

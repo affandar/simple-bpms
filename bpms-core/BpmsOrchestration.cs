@@ -36,30 +36,73 @@
             if (node != null)
             {
                 // TODO : check if the type is a logical or conditional operator then evaluate in place and proceed
-                var output = await context.ScheduleTask<IDictionary<string, string>>(
+                if (node.Task != null)
+                {
+                    var output = await context.ScheduleTask<IDictionary<string, string>>(
                     node.Task.TaskName, node.Task.TaskVersion, this.ExpandBpmsTaskInputParameters(node.InputParameterBindings));
 
-                if (output != null && output.Count > 0)
-                {
-                    this.InjectProcessVariables(node.Id, output);
+                    if (output != null && output.Count > 0)
+                    {
+                        this.InjectProcessVariables(node.Id, output);
+                    }
                 }
 
-                if (node.ChildTasksIds != null)
+                if (node.ChildTaskIds != null)
                 {
-                    await Task.WhenAll(node.ChildTasksIds.Select(id =>
+                    await Task.WhenAll(node.ChildTaskIds.Select(id =>
                         {
-                            BpmsNode childNode = null;
-                            if (this.nodeMap.TryGetValue(id, out childNode))
+                            bool moveToNextNode = true;
+                            Predicate pred = null;
+                            if(node.ChildTaskSelectors != null && node.ChildTaskSelectors.TryGetValue(id, out pred))
                             {
-                                return this.ProcessBpmsNode(context, childNode);
+                                moveToNextNode = this.EvaluatePredicate(pred);
+                            }
+
+                            if (moveToNextNode)
+                            {
+                                BpmsNode childNode = null;
+                                if (this.nodeMap.TryGetValue(id, out childNode))
+                                {
+                                    return this.ProcessBpmsNode(context, childNode);
+                                }
+                                else
+                                {
+                                    // TODO : invalid bpms flow
+                                    throw new InvalidOperationException("invalid input bpms");
+                                }
                             }
                             else
                             {
-                                // TODO : invalid bpms flow
-                                throw new InvalidOperationException("invalid input bpms");
+                                return Task.FromResult<object>(null);
                             }
                         }));
                 }
+            }
+        }
+
+        bool EvaluatePredicate(Predicate predicate)
+        {
+            string value = null;
+            if(!this.processVariables.TryGetValue(predicate.Key, out value))
+            {
+                return false;
+            }
+
+            // TODO : yes, this is very bad
+            switch(predicate.Operator)
+            {
+                case ConditionOperator.EQ:
+                    return predicate.Value.Equals(value);
+                case ConditionOperator.LTE:
+                    return Int32.Parse(value) < Int32.Parse(predicate.Value);
+                case ConditionOperator.LT:
+                    return Int32.Parse(value) <= Int32.Parse(predicate.Value);
+                case ConditionOperator.GTE:
+                    return Int32.Parse(value) >= Int32.Parse(predicate.Value);
+                case ConditionOperator.GT:
+                    return Int32.Parse(value) > Int32.Parse(predicate.Value);
+                default:
+                    throw new NotSupportedException("condition type not supported");
             }
         }
 

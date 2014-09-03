@@ -15,7 +15,31 @@
         public int Id;
         public BpmsTask Task;
         public IDictionary<string, string> InputParameterBindings;
-        public IList<int> ChildTasksIds;
+        public IList<int> ChildTaskIds;
+        public IDictionary<int, Predicate> ChildTaskSelectors;
+    }
+
+    public class Predicate
+    {
+        public string Key;
+        public ConditionOperator Operator;
+        public string Value;
+
+        public Predicate(string name, ConditionOperator op, string value)
+        {
+            this.Key = name;
+            this.Operator = op;
+            this.Value = value;
+        }
+    }
+
+    public enum ConditionOperator
+    {
+        EQ,
+        LT,
+        GT,
+        LTE,
+        GTE,
     }
 
     public class BpmsTask

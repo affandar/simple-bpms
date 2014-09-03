@@ -15,7 +15,9 @@
         public int Id;
         public BpmsTask Task;
         public IDictionary<string, string> InputParameterBindings;
-        public IList<int> ChildTasksIds;
+
+        // <condition, int>
+        public IList<Tuple<Func<IDictionary<string, string>, bool>, int>> ChildTasksSelectors;
     }
 
     public class BpmsTask

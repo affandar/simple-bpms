@@ -35,28 +35,37 @@
         {
             if (node != null)
             {
-                // TODO : check if the type is a logical or conditional operator then evaluate in place and proceed
-                var output = await context.ScheduleTask<IDictionary<string, string>>(
+                if (node.Task != null)
+                {
+                    var output = await context.ScheduleTask<IDictionary<string, string>>(
                     node.Task.TaskName, node.Task.TaskVersion, this.ExpandBpmsTaskInputParameters(node.InputParameterBindings));
 
-                if (output != null && output.Count > 0)
-                {
-                    this.InjectProcessVariables(node.Id, output);
+                    if (output != null && output.Count > 0)
+                    {
+                        this.InjectProcessVariables(node.Id, output);
+                    }
                 }
 
-                if (node.ChildTasksIds != null)
+                if (node.ChildTasksSelectors != null)
                 {
-                    await Task.WhenAll(node.ChildTasksIds.Select(id =>
+                    await Task.WhenAll(node.ChildTasksSelectors.Select(cs =>
                         {
                             BpmsNode childNode = null;
-                            if (this.nodeMap.TryGetValue(id, out childNode))
+                            if (cs.Item1(this.processVariables))
                             {
-                                return this.ProcessBpmsNode(context, childNode);
+                                if (this.nodeMap.TryGetValue(cs.Item2, out childNode))
+                                {
+                                    return this.ProcessBpmsNode(context, childNode);
+                                }
+                                else
+                                {
+                                    // TODO : invalid bpms flow
+                                    throw new InvalidOperationException("invalid input bpms");
+                                }
                             }
                             else
                             {
-                                // TODO : invalid bpms flow
-                                throw new InvalidOperationException("invalid input bpms");
+                                return Task.FromResult<object>(null);
                             }
                         }));
                 }

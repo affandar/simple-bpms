@@ -53,7 +53,11 @@
                 {
                     { "text", "%input_text%"}
                 },
-                ChildTasksIds = new List<int>() { 1 }
+                ChildTasksSelectors = new List<Tuple<Func<IDictionary<string, string>, bool>, int>>() 
+                { 
+                        new Tuple<Func<IDictionary<string, string>, bool>, int>(
+                            dict => true,  1)
+                }
             };
 
             BpmsNode node1 = new BpmsNode 
@@ -64,7 +68,7 @@
                 {
                     { "sentiment", "%sentiment_score%"}
                 },
-                ChildTasksIds = null 
+                ChildTasksSelectors = null 
             };
             
             // bpms flow that is a container for the bpms nodes

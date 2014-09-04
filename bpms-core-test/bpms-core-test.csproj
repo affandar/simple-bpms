@@ -56,7 +56,7 @@
     </Reference>
     <Reference Include="Microsoft.ServiceBus.DurableTask, Version=0.2.0.16, Culture=neutral, PublicKeyToken=f300afd708cefcd3, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\ServiceBus.DurableTask.0.2.0.16\lib\net45\Microsoft.ServiceBus.DurableTask.dll</HintPath>
+      <HintPath>..\externals\Microsoft.ServiceBus.DurableTask.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Threading.Tasks, Version=1.0.12.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>

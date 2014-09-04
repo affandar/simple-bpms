@@ -47,8 +47,9 @@
     <Reference Include="Microsoft.ServiceBus, Version=2.2.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\WindowsAzure.ServiceBus.2.2.4.0\lib\net40-full\Microsoft.ServiceBus.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.ServiceBus.DurableTask">
-      <HintPath>..\packages\ServiceBus.DurableTask.0.2.0.16\lib\net45\Microsoft.ServiceBus.DurableTask.dll</HintPath>
+    <Reference Include="Microsoft.ServiceBus.DurableTask, Version=0.2.0.16, Culture=neutral, PublicKeyToken=f300afd708cefcd3, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\externals\Microsoft.ServiceBus.DurableTask.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Threading.Tasks">
       <HintPath>..\packages\Microsoft.Bcl.Async.1.0.165\lib\net45\Microsoft.Threading.Tasks.dll</HintPath>

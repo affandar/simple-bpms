@@ -23,83 +23,60 @@
         [TestMethod]
         public async Task TestBpmsFlow()
         {
-            // bpms tasks definition
-            // this is metadata that is used by the designer
-            // TODO : parameter type info for validation in the designer
-            BpmsTask sentimentAnalyzerTask = new BpmsTask
+            // bpms flow that is a container for the bpms nodes
+            BpmsFlow flow = new BpmsFlow()
             {
-                TaskName = "SentimentAnalyzerTask",
-                TaskVersion = "1.0",
-                InputParameters = new List<string>() 
-                        { 
-                             "text" 
-                        }
-            };
-
-            BpmsTask processSentimentTask = new BpmsTask
-            {
-                TaskName = "ProcessSentimentTask",
-                TaskVersion = "1.0",
-                InputParameters = new List<string>() 
-                        { 
-                             "sentiment" 
-                        }
-            };
-
-            // bpms nodes that wrap these tasks and supply parameters and setup connections
-            BpmsNode node0 = new BpmsNode
-            {
-                Id = 0,
-                Task = sentimentAnalyzerTask,
-                InputParameterBindings = new Dictionary<string, string>()
+                Name = "TwitterSentimentFlow",
+                Version = "1.0",
+                Nodes = new List<BpmsNode>()
                 {
-                    { "text", "%tweet_body%"}
-                },
-                ChildTaskIds = new List<int> { 1 }
-            };
-
-            BpmsNode node1 = new BpmsNode
-            {
-                Id = 1,
-                ChildTaskIds = new List<int> { 2, 3 },
-                ChildTaskSelectors = new Dictionary<int, Predicate>() 
-                { 
-                    { 2, new Predicate("sentiment_score", ConditionOperator.GTE, "5") },
-                    { 3, new Predicate("sentiment_score", ConditionOperator.GTE, "3") },
+                    new BpmsNode() 
+                    {
+                        Id = 0,
+                        TaskName = "SentimentAnalyzerTask",
+                        TaskVersion = "1.0",
+                        InputParameterBindings = new Dictionary<string, string>()
+                        {
+                            { "text", "%tweet_body%"}
+                        },
+                        ChildTaskIds = new List<int> { 1 }
+                    },
+                    new BpmsNode() 
+                    {
+                        Id = 1,
+                        ChildTaskIds = new List<int> { 2, 3 },
+                        ChildTaskSelectors = new Dictionary<int, Predicate>() 
+                        {  
+                            { 2, new Predicate("sentiment_score", ConditionOperator.GTE, "5") },
+                            { 3, new Predicate("sentiment_score", ConditionOperator.GTE, "3") },
+                        }
+                    },
+                    new BpmsNode() 
+                    {
+                        Id = 2,
+                        TaskName = "ProcessSentimentTask",
+                        TaskVersion = "1.0",
+                        InputParameterBindings = new Dictionary<string, string>()
+                        {
+                            { "sentiment", "%sentiment_score%"}
+                        }
+                    },
+                    new BpmsNode() 
+                    {
+                        Id = 3,
+                        TaskName = "ProcessSentimentTask",
+                        TaskVersion = "1.0",
+                        InputParameterBindings = new Dictionary<string, string>()
+                        {
+                            { "sentiment", "%sentiment_score%"}
+                        }
+                    },
                 }
             };
 
-            BpmsNode node2 = new BpmsNode 
-            { 
-                Id = 2, 
-                Task = processSentimentTask,
-                InputParameterBindings = new Dictionary<string, string>()
-                {
-                    { "sentiment", "%sentiment_score%"}
-                },
-            };
-
-            BpmsNode node3 = new BpmsNode
-            {
-                Id = 3,
-                Task = processSentimentTask,
-                InputParameterBindings = new Dictionary<string, string>()
-                {
-                    { "sentiment", "%sentiment_score%"}
-                },
-            };
-            
-            // bpms flow that is a container for the bpms nodes
-            BpmsFlow flow = new BpmsFlow();
-
-            flow.NodeMap = new Dictionary<int, BpmsNode>() 
-            { 
-                { node0.Id, node0 }, 
-                { node1.Id, node1 },
-                { node2.Id, node2 },
-                { node3.Id, node3 } 
-            };
-
+            //File.WriteAllText("c:\\workshop\\serialized.json",
+            //     JsonConvert.SerializeObject(flow, Formatting.Indented, 
+            //     new JsonSerializerSettings() { NullValueHandling = NullValueHandling.Ignore}));
 
             BpmsRepository repository = new BpmsRepository(string.Empty);
             repository.AddConnector("SentimentAnalyzerTask", "1.0", typeof(SentimentAnalyzerTask));
@@ -111,6 +88,7 @@
 
             TriggerManager triggerManager = new TriggerManager(bpmsWorker);
             triggerManager.AddTrigger(new TwitterTrigger());
+
             triggerManager.RegisterTriggerEvent("Twitter",
                 new TriggerEventRegistration()
                 {
@@ -118,19 +96,16 @@
                     TriggerData = new Dictionary<string, object>() { { "hashtag", "inqilab" } },
                     Flow = flow
                 });
-            
-           // BpmsOrchestrationInput input = new BpmsOrchestrationInput();
-           // input.Flow = flow;
-           // input.InputParameterBindings =
-           //     new Dictionary<string, string>() 
-           //     { 
-           //         {
-           //           "input_text", "this is my sentiment" 
-           //         }
-           //     };
 
-           //File.WriteAllText("c:\\workshop\\serialized.json", 
-           //     JsonConvert.SerializeObject(flow, Formatting.Indented));
+            // BpmsOrchestrationInput input = new BpmsOrchestrationInput();
+            // input.Flow = flow;
+            // input.InputParameterBindings =
+            //     new Dictionary<string, string>() 
+            //     { 
+            //         {
+            //           "input_text", "this is my sentiment" 
+            //         }
+            //     };
 
             //OrchestrationInstance instance = await bpmsWorker.CreateBpmsFlowInstanceAsync(input);
 

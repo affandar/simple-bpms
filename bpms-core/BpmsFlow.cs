@@ -2,20 +2,23 @@
 {
     using System;
     using System.Collections.Generic;
+    using Newtonsoft.Json;
+    using Newtonsoft.Json.Converters;
 
     public class BpmsFlow
     {
         public string Name;
         public string Version;
-        public IDictionary<int, BpmsNode> NodeMap;
-        public IList<string> InputParameters;
+        public IList<string> InputParameterBindings;
+        public IList<BpmsNode> Nodes;
     }
 
     // TODO : out variable maping as well
     public class BpmsNode
     {
         public int Id;
-        public BpmsTask Task;
+        public string TaskName;
+        public string TaskVersion;
         public IDictionary<string, string> InputParameterBindings;
         public IList<int> ChildTaskIds;
         public IDictionary<int, Predicate> ChildTaskSelectors;
@@ -35,6 +38,7 @@
         }
     }
 
+    [JsonConverter(typeof(StringEnumConverter))]
     public enum ConditionOperator
     {
         EQ,
@@ -44,12 +48,12 @@
         GTE,
     }
 
-    public class BpmsTask
-    {
-        public string TaskName;
-        public string TaskVersion;
-        public IList<string> InputParameters;
-    }
+    //public class BpmsTask
+    //{
+    //    public string TaskName;
+    //    public string TaskVersion;
+    //    public IList<string> InputParameters;
+    //}
 
     // TODO : OM to capture what we show in the designer toolbox etc.
     //

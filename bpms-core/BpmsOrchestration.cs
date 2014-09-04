@@ -14,10 +14,10 @@
         public override async Task<BpmsOrchestrationOutput> RunTask(OrchestrationContext context, BpmsOrchestrationInput input)
         {
             this.processVariables = new Dictionary<string, string>();
-            
+            this.nodeMap = input.Flow.Nodes.ToDictionary<BpmsNode, int>(n => n.Id);
+
             // input becomes the global process variables we begin with
             this.InjectProcessVariables(-1, input.InputParameterBindings);
-            this.nodeMap = input.Flow.NodeMap;
             
             BpmsNode rootNode = null;
 
@@ -36,10 +36,10 @@
             if (node != null)
             {
                 // TODO : check if the type is a logical or conditional operator then evaluate in place and proceed
-                if (node.Task != null)
+                if (!string.IsNullOrWhiteSpace(node.TaskName))
                 {
                     var output = await context.ScheduleTask<IDictionary<string, string>>(
-                    node.Task.TaskName, node.Task.TaskVersion, 
+                    node.TaskName, node.TaskVersion, 
                     Utils.GetBoundParameters(this.processVariables, node.InputParameterBindings));
 
                     if (output != null && output.Count > 0)

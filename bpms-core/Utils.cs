@@ -15,7 +15,6 @@
         {
             IDictionary<string, string> clonedParameters = null;
             if (parameters != null)
-
             {
                 clonedParameters = new Dictionary<string, string>(parameters);
 
@@ -26,7 +25,7 @@
                     {
                         if (paramKvp.Value != null)
                         {
-                            clonedParameters[paramKvp.Key] = paramKvp.Value.Replace("%" + kvp.Key + "%", kvp.Value);
+                            clonedParameters[paramKvp.Key] = clonedParameters[paramKvp.Key].Replace("%" + kvp.Key + "%", kvp.Value);
                         }
                     }
                 }

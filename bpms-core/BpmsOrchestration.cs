@@ -38,9 +38,9 @@
                 // TODO : check if the type is a logical or conditional operator then evaluate in place and proceed
                 if (!string.IsNullOrWhiteSpace(node.TaskName))
                 {
+                    IDictionary<string, string> expandedParameters = Utils.GetBoundParameters(this.processVariables, node.InputParameterBindings);
                     var output = await context.ScheduleTask<IDictionary<string, string>>(
-                    node.TaskName, node.TaskVersion, 
-                    Utils.GetBoundParameters(this.processVariables, node.InputParameterBindings));
+                    node.TaskName, node.TaskVersion, expandedParameters);
 
                     if (output != null && output.Count > 0)
                     {
@@ -95,9 +95,9 @@
                 case ConditionOperator.EQ:
                     return predicate.Value.Equals(value);
                 case ConditionOperator.LTE:
-                    return Int32.Parse(value) < Int32.Parse(predicate.Value);
-                case ConditionOperator.LT:
                     return Int32.Parse(value) <= Int32.Parse(predicate.Value);
+                case ConditionOperator.LT:
+                    return Int32.Parse(value) < Int32.Parse(predicate.Value);
                 case ConditionOperator.GTE:
                     return Int32.Parse(value) >= Int32.Parse(predicate.Value);
                 case ConditionOperator.GT:

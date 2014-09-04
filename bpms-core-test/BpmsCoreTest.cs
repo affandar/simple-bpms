@@ -12,6 +12,7 @@
     using System.Diagnostics;
     using Simple.Bpms.Triggers;
     using Simple.Bpms.Triggers.Twitter;
+    using Simple.Bpms.Tasks.SystemTasks;
 
     [TestClass]
     public class BpmsCoreTest
@@ -33,7 +34,7 @@
                     new BpmsNode() 
                     {
                         Id = 0,
-                        TaskName = "SentimentAnalyzerTask",
+                        TaskName = "SentimentAnalysisTask",
                         TaskVersion = "1.0",
                         InputParameterBindings = new Dictionary<string, string>()
                         {
@@ -47,29 +48,47 @@
                         ChildTaskIds = new List<int> { 2, 3 },
                         ChildTaskSelectors = new Dictionary<int, Predicate>() 
                         {  
-                            { 2, new Predicate("sentiment_score", ConditionOperator.GTE, "5") },
-                            { 3, new Predicate("sentiment_score", ConditionOperator.GTE, "3") },
+                            { 2, new Predicate("sentiment_score", ConditionOperator.GTE, "0") },
+                            { 3, new Predicate("sentiment_score", ConditionOperator.LT, "0") },
                         }
                     },
                     new BpmsNode() 
                     {
                         Id = 2,
-                        TaskName = "ProcessSentimentTask",
+                        TaskName = "EmailTask",
                         TaskVersion = "1.0",
                         InputParameterBindings = new Dictionary<string, string>()
                         {
-                            { "sentiment", "%sentiment_score%"}
+                            { "from", "bpms@bpms.org"},
+                            { "to", "affandar@microsoft.com"},
+                            { "subject", "Sentiment score is: %sentiment_score%!"},
+                            { "body", "Congratulations! Received high sentiment score of: %sentiment_score%!"},
                         }
                     },
                     new BpmsNode() 
                     {
                         Id = 3,
-                        TaskName = "ProcessSentimentTask",
+                        TaskName = "TextProcessingTask",
                         TaskVersion = "1.0",
                         InputParameterBindings = new Dictionary<string, string>()
                         {
-                            { "sentiment", "%sentiment_score%"}
-                        }
+                            { "text", "%tweet_body%"},
+                            { "command", "remove:damn"},
+                        },
+                        ChildTaskIds = new List<int> { 4 },
+                    },
+                    new BpmsNode() 
+                    {
+                        Id = 4,
+                        TaskName = "EmailTask",
+                        TaskVersion = "1.0",
+                        InputParameterBindings = new Dictionary<string, string>()
+                        {
+                            { "from", "bpms@bpms.org"},
+                            { "to", "affandar@microsoft.com"},
+                            { "subject", "Pay attention: %sentiment_score%!"},
+                            { "body", "Bad news. Sentiment score: %sentiment_score%. Someone said: %processed_text%"},
+                        },
                     },
                 }
             };
@@ -79,8 +98,10 @@
             //     new JsonSerializerSettings() { NullValueHandling = NullValueHandling.Ignore}));
 
             BpmsRepository repository = new BpmsRepository(string.Empty);
-            repository.AddConnector("SentimentAnalyzerTask", "1.0", typeof(SentimentAnalyzerTask));
-            repository.AddConnector("ProcessSentimentTask", "1.0", typeof(ProcessSentimentTask));
+            repository.AddConnector("EmailTask", "1.0", typeof(EmailTask));
+            repository.AddConnector("SentimentAnalysisTask", "1.0", typeof(SentimentAnalysisTask));
+            repository.AddConnector("TextProcessingTask", "1.0", typeof(TextProcessingTask));
+            repository.AddConnector("HttpCalloutTask", "1.0", typeof(HttpCalloutTask));
 
 
             SimpleBpmsWorker bpmsWorker = new SimpleBpmsWorker(repository, ServiceBusConnectionString, StorageConnectionString);
@@ -93,7 +114,7 @@
                 new TriggerEventRegistration()
                 {
                     Id = "reg1",
-                    TriggerData = new Dictionary<string, object>() { { "hashtag", "inqilab" } },
+                    TriggerData = new Dictionary<string, object>() { { "hashtag", "simplebpmstest" } },
                     Flow = flow
                 });
 

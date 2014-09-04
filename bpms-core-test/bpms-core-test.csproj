@@ -152,6 +152,10 @@
       <Project>{0e60c2d0-30ba-4ee8-a1c6-8ddcd5dc366d}</Project>
       <Name>bpms-core</Name>
     </ProjectReference>
+    <ProjectReference Include="..\bpms-tasks\bpms-tasks.csproj">
+      <Project>{b0bba829-1690-426b-bfb4-654dbe3f226c}</Project>
+      <Name>bpms-tasks</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

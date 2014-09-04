@@ -39,7 +39,8 @@
                 if (node.Task != null)
                 {
                     var output = await context.ScheduleTask<IDictionary<string, string>>(
-                    node.Task.TaskName, node.Task.TaskVersion, this.ExpandBpmsTaskInputParameters(node.InputParameterBindings));
+                    node.Task.TaskName, node.Task.TaskVersion, 
+                    Utils.GetBoundParameters(this.processVariables, node.InputParameterBindings));
 
                     if (output != null && output.Count > 0)
                     {
@@ -118,23 +119,23 @@
             }
         }
 
-        // grab values from process variables if required
-        IDictionary<string, string> ExpandBpmsTaskInputParameters(IDictionary<string, string> specifiedParameters)
-        {
-            if(specifiedParameters != null)
-            {
-                IDictionary<string, string> clonedSpecifiedParameters = new Dictionary<string, string>(specifiedParameters);
+        //// grab values from process variables if required
+        //IDictionary<string, string> ExpandBpmsTaskInputParameters(IDictionary<string, string> specifiedParameters)
+        //{
+        //    if(specifiedParameters != null)
+        //    {
+        //        IDictionary<string, string> clonedSpecifiedParameters = new Dictionary<string, string>(specifiedParameters);
 
-                // TODO : very ugly but gets the job done for now
-                foreach(var kvp in this.processVariables)
-                {
-                    foreach(var paramKvp in clonedSpecifiedParameters)
-                    {
-                        specifiedParameters[paramKvp.Key] = paramKvp.Value.Replace("%" + kvp.Key + "%", kvp.Value);
-                    }
-                }
-            }
-            return specifiedParameters;
-        }
+        //        // TODO : very ugly but gets the job done for now
+        //        foreach(var kvp in this.processVariables)
+        //        {
+        //            foreach(var paramKvp in clonedSpecifiedParameters)
+        //            {
+        //                specifiedParameters[paramKvp.Key] = paramKvp.Value.Replace("%" + kvp.Key + "%", kvp.Value);
+        //            }
+        //        }
+        //    }
+        //    return specifiedParameters;
+        //}
     }
 }

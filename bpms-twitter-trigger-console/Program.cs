@@ -10,13 +10,13 @@
     {
         static void Main(string[] args)
         {
-            TwitterTrigger trigger = new TwitterTrigger(new string[] { "inqilab" }, false);
-            trigger.StartAsync();
+            //TwitterEventTrigger trigger = new TwitterEventTrigger(new string[] { "inqilab" }, false);
+            //trigger.StartAsync();
 
-            Console.WriteLine("Press enter key to exit.");
-            Console.ReadLine();
+            //Console.WriteLine("Press enter key to exit.");
+            //Console.ReadLine();
 
-            trigger.Stop();
+            //trigger.Stop();
         }
     }
 }

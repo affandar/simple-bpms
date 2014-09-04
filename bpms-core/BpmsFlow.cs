@@ -5,6 +5,8 @@
 
     public class BpmsFlow
     {
+        public string Name;
+        public string Version;
         public IDictionary<int, BpmsNode> NodeMap;
         public IList<string> InputParameters;
     }

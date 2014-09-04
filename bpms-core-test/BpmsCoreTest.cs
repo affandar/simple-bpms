@@ -10,6 +10,8 @@
     using System.Threading.Tasks;
     using Microsoft.ServiceBus.DurableTask;
     using System.Diagnostics;
+    using Simple.Bpms.Triggers;
+    using Simple.Bpms.Triggers.Twitter;
 
     [TestClass]
     public class BpmsCoreTest
@@ -51,7 +53,7 @@
                 Task = sentimentAnalyzerTask,
                 InputParameterBindings = new Dictionary<string, string>()
                 {
-                    { "text", "%input_text%"}
+                    { "text", "%tweet_body%"}
                 },
                 ChildTaskIds = new List<int> { 1 }
             };
@@ -103,26 +105,40 @@
             repository.AddConnector("SentimentAnalyzerTask", "1.0", typeof(SentimentAnalyzerTask));
             repository.AddConnector("ProcessSentimentTask", "1.0", typeof(ProcessSentimentTask));
 
+
             SimpleBpmsWorker bpmsWorker = new SimpleBpmsWorker(repository, ServiceBusConnectionString, StorageConnectionString);
             bpmsWorker.Start();
+
+            TriggerManager triggerManager = new TriggerManager(bpmsWorker);
+            triggerManager.AddTrigger(new TwitterTrigger());
+            triggerManager.RegisterTriggerEvent("Twitter",
+                new TriggerEventRegistration()
+                {
+                    Id = "reg1",
+                    TriggerData = new Dictionary<string, object>() { { "hashtag", "inqilab" } },
+                    Flow = flow
+                });
             
-            BpmsOrchestrationInput input = new BpmsOrchestrationInput();
-            input.Flow = flow;
-            input.InputParameterBindings =
-                new Dictionary<string, string>() 
-                { 
-                    {
-                      "input_text", "this is my sentiment" 
-                    }
-                };
+           // BpmsOrchestrationInput input = new BpmsOrchestrationInput();
+           // input.Flow = flow;
+           // input.InputParameterBindings =
+           //     new Dictionary<string, string>() 
+           //     { 
+           //         {
+           //           "input_text", "this is my sentiment" 
+           //         }
+           //     };
 
-           File.WriteAllText("c:\\workshop\\serialized.json", 
-                JsonConvert.SerializeObject(flow, Formatting.Indented));
+           //File.WriteAllText("c:\\workshop\\serialized.json", 
+           //     JsonConvert.SerializeObject(flow, Formatting.Indented));
 
-            OrchestrationInstance instance = await bpmsWorker.CreateBpmsFlowInstanceAsync(input);
+            //OrchestrationInstance instance = await bpmsWorker.CreateBpmsFlowInstanceAsync(input);
 
-            OrchestrationState state = WaitForOrchestration(bpmsWorker, instance, TimeSpan.FromMinutes(1), 
-                s => s.OrchestrationStatus != OrchestrationStatus.Running);
+            //OrchestrationState state = WaitForOrchestration(bpmsWorker, instance, TimeSpan.FromMinutes(1), 
+            //    s => s.OrchestrationStatus != OrchestrationStatus.Running);
+
+            Console.ReadLine();
+
 
             bpmsWorker.Stop();
         }

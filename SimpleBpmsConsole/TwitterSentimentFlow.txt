@@ -1,0 +1,86 @@
+﻿{
+  "Name": "TwitterSentimentFlow",
+  "Version": "1.0",
+  "Trigger": {
+    "Type": "Twitter",
+    "TriggerData": {
+      "hashtag": "inqilab"
+    }
+  },
+  "InputParameterBindings": null,
+  "Nodes": [
+    {
+      "Id": 0,
+      "TaskName": "SentimentAnalysisTask",
+      "TaskVersion": "1.0",
+      "InputParameterBindings": {
+        "text": "%tweet_body%"
+      },
+      "ChildTaskIds": [
+        1
+      ],
+      "ChildTaskSelectors": null
+    },
+    {
+      "Id": 1,
+      "TaskName": null,
+      "TaskVersion": null,
+      "InputParameterBindings": null,
+      "ChildTaskIds": [
+        2,
+        3
+      ],
+      "ChildTaskSelectors": {
+        "2": {
+          "Key": "sentiment_score",
+          "Operator": "GTE",
+          "Value": "0"
+        },
+        "3": {
+          "Key": "sentiment_score",
+          "Operator": "LT",
+          "Value": "0"
+        }
+      }
+    },
+    {
+      "Id": 2,
+      "TaskName": "EmailTask",
+      "TaskVersion": "1.0",
+      "InputParameterBindings": {
+        "from": "bpms@bpms.org",
+        "to": "affandar@microsoft.com",
+        "subject": "Sentiment score is: %sentiment_score%!",
+       "body": "Congratulations! Received high sentiment score of: %sentiment_score%! tweet: %tweet_body%"
+      },
+      "ChildTaskIds": null,
+      "ChildTaskSelectors": null
+    },
+    {
+      "Id": 3,
+      "TaskName": "TextProcessingTask",
+      "TaskVersion": "1.0",
+      "InputParameterBindings": {
+        "text": "%tweet_body%",
+        "command": "remove:damn"
+      },
+      "ChildTaskIds": [
+        4
+      ],
+      "ChildTaskSelectors": null
+    },
+    {
+      "Id": 4,
+      "TaskName": "EmailTask",
+      "TaskVersion": "1.0",
+      "InputParameterBindings": {
+        "from": "bpms@bpms.org",
+        "to": "affandar@microsoft.com",
+        "subject": "Pay attention: %sentiment_score%!",
+        "body": "Bad news. Sentiment score: %sentiment_score%. Someone said: %processed_text%"
+      },
+      "ChildTaskIds": null,
+      "ChildTaskSelectors": null
+    }
+  ]
+}

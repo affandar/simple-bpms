@@ -6,21 +6,50 @@
     using System.ServiceModel;
     using System.Text;
     using System.Threading.Tasks;
+    using Simple.Bpms;
     using simple_bpms_console_host;
     
     class Program
     {
+        public const string StorageConnectionString = "UseDevelopmentStorage=true;";
+
+        static Options options = new Options();
+        static ISimpleBpmsHost host;
+        static BpmsRepository repository;
+
         static void Main(string[] args)
         {
-            ISimpleBpmsHost host = CreateClient();
+            string invokedVerb = string.Empty;
+            object invokedVerbInstance = null;
+            if (!CommandLine.Parser.Default.ParseArguments(args, options,
+                  (verb, subOptions) =>
+                  {
+                      // if parsing succeeds the verb name and correct instance
+                      // will be passed to onVerbCommand delegate (string,object)
+                      invokedVerb = verb;
+                      invokedVerbInstance = subOptions;
+                  }))
+            {
+                Console.WriteLine("Invalid Command...");
+                Environment.Exit(CommandLine.Parser.DefaultExitCodeFail);
+            }
 
-            Console.ReadLine();
+            RepositoryAzureTableStore repositoryStore = new RepositoryAzureTableStore("repository", StorageConnectionString);
+            repositoryStore.CreateRepositoryIfNotExists();
 
-            host.StartBpmsFlowAsync("TwitterSentimentFlow", "1.0").Wait();
+            host = CreateClient();
 
-            Console.ReadLine();
-
-            host.StopBpmsFlowAsync("sdf", null).Wait();
+            if (invokedVerb == "start-flow")
+            {
+                StartFlowOptions startFlowOptions = (StartFlowOptions) invokedVerbInstance;
+                repository.AddDslFlow(startFlowOptions.Name, startFlowOptions.Version, startFlowOptions.DslFile);
+                host.StartBpmsFlowAsync(startFlowOptions.Name, startFlowOptions.Version).Wait();
+            }
+            else if (invokedVerb == "stop-flow")
+            {
+                StopFlowOptions stopFlowOptions = (StopFlowOptions)invokedVerbInstance;
+                host.StopBpmsFlowAsync(stopFlowOptions.Name, stopFlowOptions.Version).Wait();
+            }
         }
 
         public static ISimpleBpmsHost CreateClient()

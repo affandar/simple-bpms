@@ -42,9 +42,9 @@
             repository.AddConnector("TextProcessingTask", "1.0", typeof(TextProcessingTask));
             repository.AddConnector("HttpCalloutTask", "1.0", typeof(HttpCalloutTask));
 
-            repository.AddDslFlow(DefaultBpmsFlows.TwitterSentimentFlow.Name,
-                DefaultBpmsFlows.TwitterSentimentFlow.Version,
-                DefaultBpmsFlows.GetSerializedFlow(DefaultBpmsFlows.TwitterSentimentFlow));
+            //repository.AddDslFlow(DefaultBpmsFlows.TwitterSentimentFlow.Name,
+            //    DefaultBpmsFlows.TwitterSentimentFlow.Version,
+            //    DefaultBpmsFlows.GetSerializedFlow(DefaultBpmsFlows.TwitterSentimentFlow));
 
             WorkflowLazyLoadObjectManager orchestrationManager = new WorkflowLazyLoadObjectManager(repository);
             ActivityLazyLoadObjectManager activityManager = new ActivityLazyLoadObjectManager(repository);

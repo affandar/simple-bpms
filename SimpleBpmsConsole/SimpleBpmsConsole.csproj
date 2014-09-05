@@ -91,6 +91,9 @@
   <ItemGroup>
     <None Include="App.config" />
     <None Include="packages.config" />
+    <None Include="TwitterSentimentCodeProcessFlow.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="TwitterSentimentFlow.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

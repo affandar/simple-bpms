@@ -41,7 +41,7 @@
 
         public void AddCodeFlow(string name, string version, Type taskOrchestrationType)
         {
-            this.AddConnector(name, version, taskOrchestrationType.Assembly.FullName, taskOrchestrationType.FullName);
+            this.AddCodeFlow(name, version, taskOrchestrationType.Assembly.FullName, taskOrchestrationType.FullName);
         }
 
         public void AddCodeFlow(string name, string version, string assemblyName, string typeName)

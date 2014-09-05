@@ -46,6 +46,7 @@
             repository.AddConnector("HttpCalloutTask", "1.0", typeof(HttpCalloutTask));
             repository.AddConnector("SalesForceCreateRecordTask", "1.0", typeof(SalesForceCreateRecordTask));
             repository.AddConnector("KpiTask", "1.0", typeof(KpiTask));
+            repository.AddCodeFlow("HandleNegativeSentimentProcess", "1.0", typeof(HandleNegativeSentimentProcess));
 
            /* repository.AddDslFlow(DefaultBpmsFlows.TwitterSentimentFlow.Name,
                 DefaultBpmsFlows.TwitterSentimentFlow.Version,
@@ -61,6 +62,7 @@
 
             //File.WriteAllText("c:\\workshop\\TwitterSentimentSalesforceFlow.json", DefaultBpmsFlows.GetSerializedFlow(DefaultBpmsFlows.TwitterSentimentSalesForceFlow));
             //File.WriteAllText("c:\\workshop\\TwitterSentimentSalesForceWithKpiFlow.json", DefaultBpmsFlows.GetSerializedFlow(DefaultBpmsFlows.TwitterSentimentSalesForceWithKpiFlow));
+            //File.WriteAllText("c:\\workshop\\TwitterSentimentCodeProcessFlow.json", DefaultBpmsFlows.GetSerializedFlow(DefaultBpmsFlows.TwitterSentimentCodeProcessFlow));
 
 
             WorkflowLazyLoadObjectManager orchestrationManager = new WorkflowLazyLoadObjectManager(repository);

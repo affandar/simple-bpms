@@ -87,6 +87,7 @@
     <Compile Include="KpiTask.cs" />
     <Compile Include="SalesForceCreateRecordTask.cs" />
     <Compile Include="EmailTask.cs" />
+    <Compile Include="HandleNegativeSentimentProcess.cs" />
     <Compile Include="TextProcessingTask.cs" />
     <Compile Include="SentimentAnalysisTask.cs" />
     <Compile Include="HttpCalloutTask.cs" />

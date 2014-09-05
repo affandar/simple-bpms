@@ -38,9 +38,25 @@
                 // TODO : check if the type is a logical or conditional operator then evaluate in place and proceed
                 if (!string.IsNullOrWhiteSpace(node.TaskName))
                 {
+                    BpmsNodeType nodeType = BpmsNodeType.Task;
+                    if(node.NodeType != null)
+                    {
+                        nodeType = node.NodeType.Value;
+                    }
+
+                    IDictionary<string, string> output = null;
                     IDictionary<string, string> expandedParameters = Utils.GetBoundParameters(this.processVariables, node.InputParameterBindings);
-                    var output = await context.ScheduleTask<IDictionary<string, string>>(
-                    node.TaskName, node.TaskVersion, expandedParameters);
+
+                    if (nodeType == BpmsNodeType.Task)
+                    {
+                        output = await context.ScheduleTask<IDictionary<string, string>>(
+                                    node.TaskName, node.TaskVersion, expandedParameters);
+                    }
+                    else
+                    {
+                        output = await context.CreateSubOrchestrationInstance<IDictionary<string, string>>(
+                                    node.TaskName, node.TaskVersion, expandedParameters);
+                    }
 
                     if (output != null && output.Count > 0)
                     {

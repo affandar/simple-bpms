@@ -7,14 +7,20 @@
 
     public class HttpCalloutTask : BpmsTask
     {
-        protected override Task<IDictionary<string, string>> OnExecuteAsync(TaskContext context, IDictionary<string, string> input)
+        const string RequestUriInputKey = "request_uri";
+        const string TestValueInputKey = "test_value";
+
+        const string ResponseValueOutputKey = "response_value";
+
+        protected override async Task<IDictionary<string, string>> OnExecuteAsync(TaskContext context, IDictionary<string, string> input)
         {
-            throw new System.NotImplementedException();
+            // mock http callout, just echo back
+            return new Dictionary<string, string> { { ResponseValueOutputKey, input[TestValueInputKey] } };
         }
 
         protected override string[] RequiredInputKeys
         {
-            get { throw new System.NotImplementedException(); }
+            get { return new string[] { RequestUriInputKey, TestValueInputKey }; }
         }
     }
 }

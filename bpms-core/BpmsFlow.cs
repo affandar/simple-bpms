@@ -21,9 +21,16 @@
         public int Id;
         public string TaskName;
         public string TaskVersion;
+        public BpmsNodeType? NodeType;
         public IDictionary<string, string> InputParameterBindings;
         public IList<int> ChildTaskIds;
         public IDictionary<int, Predicate> ChildTaskSelectors;
+    }
+
+    public enum BpmsNodeType
+    {
+        Task,
+        Process
     }
 
     public class Predicate

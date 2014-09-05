@@ -6,6 +6,7 @@
     using Simple.Bpms.Triggers;
     using Tweetinvi;
     using Tweetinvi.Core.Events.EventArguments;
+    using Tweetinvi.Core.Interfaces;
     using Tweetinvi.Core.Interfaces.Streaminvi;
 
     /// <summary>
@@ -21,7 +22,9 @@
     public class TwitterTrigger : ITrigger
     {
         public const string Input_HashTagKey = "hashtag";
+        public const string Output_TweetFromKey = "tweet_from";
         public const string Output_TweetBodyKey = "tweet_body";
+        public const string Output_TweetSourceKey = "tweet_source";
 
         IDictionary<string, TwitterEventTrigger> eventTriggerMap;
 
@@ -61,10 +64,12 @@
             TwitterEventTrigger eventTrigger = new TwitterEventTrigger(new string[] { (string)hashtagObj }, true,
                 o =>
                 {
-                    string tweetText = (string)o;
+                    ITweet tweet = (ITweet)o;
                     Dictionary<string, string> heap = new Dictionary<string, string>()
                     {
-                        { Output_TweetBodyKey, tweetText }
+                        { Output_TweetBodyKey, tweet.Text },
+                        { Output_TweetSourceKey, tweet.Source },
+                        { Output_TweetFromKey, tweet.Creator.ScreenName }
                     };
 
                     manager.CreateBpmsFlow(registration.Flow, heap);
@@ -154,7 +159,7 @@
 
         void filteredStream_MatchingTweetReceived(object sender, MatchedTweetReceivedEventArgs args)
         {
-            this.eventRaisedFunc(args.Tweet.Text);
+            this.eventRaisedFunc(args.Tweet);
         }
     }
 }

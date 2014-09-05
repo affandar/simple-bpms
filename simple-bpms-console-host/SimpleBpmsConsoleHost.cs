@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.IO;
     using System.Linq;
     using System.ServiceModel;
     using System.ServiceModel.Description;
@@ -33,18 +34,31 @@
         public void StartWcfService()
         {
             RepositoryAzureTableStore repositoryStore = new RepositoryAzureTableStore("repository", StorageConnectionString);
+            repositoryStore.DeleteRepositoryIfExist();
             repositoryStore.CreateRepositoryIfNotExists();
 
             BpmsRepository repository = new BpmsRepository(repositoryStore);
+      
 
             repository.AddConnector("EmailTask", "1.0", typeof(EmailTask));
             repository.AddConnector("SentimentAnalysisTask", "1.0", typeof(SentimentAnalysisTask));
             repository.AddConnector("TextProcessingTask", "1.0", typeof(TextProcessingTask));
             repository.AddConnector("HttpCalloutTask", "1.0", typeof(HttpCalloutTask));
+            repository.AddConnector("SalesForceCreateRecordTask", "1.0", typeof(SalesForceCreateRecordTask));
+            repository.AddConnector("KpiTask", "1.0", typeof(KpiTask));
 
+            //File.WriteAllText("c:\\workshop\\TwitterSentimentFlow.json", DefaultBpmsFlows.GetSerializedFlow(DefaultBpmsFlows.TwitterSentimentFlow));
             repository.AddDslFlow(DefaultBpmsFlows.TwitterSentimentFlow.Name,
                 DefaultBpmsFlows.TwitterSentimentFlow.Version,
                 DefaultBpmsFlows.GetSerializedFlow(DefaultBpmsFlows.TwitterSentimentFlow));
+
+            repository.AddDslFlow(DefaultBpmsFlows.TwitterSentimentSalesForceFlow.Name,
+                DefaultBpmsFlows.TwitterSentimentSalesForceFlow.Version,
+                DefaultBpmsFlows.GetSerializedFlow(DefaultBpmsFlows.TwitterSentimentSalesForceFlow));
+
+            repository.AddDslFlow(DefaultBpmsFlows.TwitterSentimentSalesForceWithKpiFlow.Name,
+                DefaultBpmsFlows.TwitterSentimentSalesForceWithKpiFlow.Version,
+                DefaultBpmsFlows.GetSerializedFlow(DefaultBpmsFlows.TwitterSentimentSalesForceWithKpiFlow));
 
             WorkflowLazyLoadObjectManager orchestrationManager = new WorkflowLazyLoadObjectManager(repository);
             ActivityLazyLoadObjectManager activityManager = new ActivityLazyLoadObjectManager(repository);

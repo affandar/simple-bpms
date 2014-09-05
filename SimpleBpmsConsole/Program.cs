@@ -16,7 +16,7 @@
 
             Console.ReadLine();
 
-            host.StartBpmsFlowAsync("TwitterSentimentFlow", "1.0").Wait();
+            host.StartBpmsFlowAsync("TwitterSentimentSalesForceWithKpiFlow", "1.0").Wait();
 
             Console.ReadLine();
 

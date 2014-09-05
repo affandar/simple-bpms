@@ -29,6 +29,11 @@
             {
                 Name = "TwitterSentimentFlow",
                 Version = "1.0",
+                Trigger =  new BpmsTrigger()
+                {
+                    Type = "Twitter",
+                    TriggerData = new Dictionary<string, object>() { { "hashtag", "appplat" } },
+                },
                 Nodes = new List<BpmsNode>()
                 {
                     new BpmsNode() 
@@ -62,7 +67,7 @@
                             { "from", "bpms@bpms.org"},
                             { "to", "affandar@microsoft.com"},
                             { "subject", "Sentiment score is: %sentiment_score%!"},
-                            { "body", "Congratulations! Received high sentiment score of: %sentiment_score%!"},
+                            { "body", "Congratulations! Received high sentiment score of: %sentiment_score%! tweet: %tweet_body%"},
                         }
                     },
                     new BpmsNode() 
@@ -105,18 +110,22 @@
 
 
             SimpleBpmsWorker bpmsWorker = new SimpleBpmsWorker(repository, ServiceBusConnectionString, StorageConnectionString);
+
+            // TODO : triggers should also be part of the repository
+            bpmsWorker.RegisterBpmsTrigger(new TwitterTrigger());
+
             bpmsWorker.Start();
 
-            TriggerManager triggerManager = new TriggerManager(bpmsWorker);
-            triggerManager.AddTrigger(new TwitterTrigger());
+            bpmsWorker.StartBpmsFlow(flow);
 
-            triggerManager.RegisterTriggerEvent("Twitter",
-                new TriggerEventRegistration()
-                {
-                    Id = "reg1",
-                    TriggerData = new Dictionary<string, object>() { { "hashtag", "simplebpmstest" } },
-                    Flow = flow
-                });
+            Thread.Sleep(TimeSpan.FromMinutes(5));
+
+            bpmsWorker.StopBpmsFlow(flow.Name);
+
+            Console.ReadLine();
+
+            bpmsWorker.Stop();
+
 
             // BpmsOrchestrationInput input = new BpmsOrchestrationInput();
             // input.Flow = flow;
@@ -133,10 +142,6 @@
             //OrchestrationState state = WaitForOrchestration(bpmsWorker, instance, TimeSpan.FromMinutes(1), 
             //    s => s.OrchestrationStatus != OrchestrationStatus.Running);
 
-            Console.ReadLine();
-
-
-            bpmsWorker.Stop();
         }
 
         protected static OrchestrationState WaitForOrchestration(SimpleBpmsWorker worker, OrchestrationInstance orchestrationInstance,

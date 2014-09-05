@@ -12,6 +12,7 @@
     using Microsoft.ServiceBus.DurableTask;
     using Microsoft.ServiceBus.Messaging;
     using Microsoft.WindowsAzure.Storage;
+    using Simple.Bpms.Triggers;
 
     // TODO : 
     //      + finish up bpms flow OM
@@ -27,6 +28,10 @@
         readonly BpmsRepository repository;
 
         const string HubName = "SimpleBpms";
+
+        IDictionary<string, Tuple<TriggerEventRegistration, BpmsFlow>> flowMap;
+
+        TriggerManager triggerManager;
         
         public SimpleBpmsWorker(BpmsRepository repository, string serviceBusConnectionString, string storageConnectionString)
         {
@@ -62,6 +67,10 @@
                 workerSettings);
 
             this.taskHubWorker.AddTaskOrchestrations(typeof(BpmsOrchestration));
+
+            this.flowMap = new Dictionary<string, Tuple<TriggerEventRegistration, BpmsFlow>>();
+
+            this.triggerManager = new TriggerManager(this);
         }
 
         public void Start()
@@ -78,6 +87,11 @@
             this.taskHubWorker.Start();
         }
 
+        public void RegisterBpmsTrigger(ITrigger trigger)
+        {
+            this.triggerManager.AddTrigger(trigger);
+        }
+
         public void RegisterBpmsTaskActivity(string name, string version, Type taskActivityType)
         {
             this.repository.AddConnector(name, version, taskActivityType.Assembly.FullName, taskActivityType.FullName);
@@ -86,6 +100,40 @@
         public Task<OrchestrationInstance> CreateBpmsFlowInstanceAsync(BpmsOrchestrationInput input)
         {
             return this.taskHubClient.CreateOrchestrationInstanceAsync(typeof(BpmsOrchestration), input);
+        }
+
+        public Task<OrchestrationInstance> CreateCodeOrchestrationInstanceAsync(string name, string version, IDictionary<string, string> input)
+        {
+            return this.taskHubClient.CreateOrchestrationInstanceAsync(name, version, input);
+        }
+
+        public void StartBpmsFlow(BpmsFlow flow)
+        {
+            if(this.flowMap.ContainsKey(flow.Name))
+            {
+                throw new InvalidOperationException("Flow already exists: " + flow.Name);
+            }
+
+            TriggerEventRegistration registration = new TriggerEventRegistration()
+            {
+                Id = Guid.NewGuid().ToString(),
+                Flow = flow,
+                TriggerData = flow.Trigger.TriggerData,
+                Type = flow.Trigger.Type,
+            };
+
+            this.flowMap[flow.Name] = new Tuple<TriggerEventRegistration,BpmsFlow>(registration, flow);
+            this.triggerManager.RegisterTriggerEvent(registration);
+        }
+
+        public void StopBpmsFlow(string name)
+        {
+            if (this.flowMap.ContainsKey(name))
+            {
+                var triggerAndFlow = this.flowMap[name];
+                this.triggerManager.UnregisterTriggerEvent(triggerAndFlow.Item1.Type, triggerAndFlow.Item1.Id);
+                this.flowMap.Remove(name);
+            }
         }
 
         public Task<OrchestrationState> GetOrchestrationStateAsync(OrchestrationInstance instance)

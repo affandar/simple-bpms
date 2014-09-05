@@ -143,7 +143,6 @@
   </Choose>
   <ItemGroup>
     <Compile Include="BpmsCoreTest.cs" />
-    <Compile Include="BpmsTestTasks.cs" />
     <Compile Include="OrchestrationTraceListener.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

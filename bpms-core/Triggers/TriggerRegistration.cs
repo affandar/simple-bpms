@@ -2,9 +2,18 @@
 {
     using System.Collections.Generic;
 
+    public class BpmsTrigger
+    {
+        public string Type;
+
+        public IDictionary<string, object> TriggerData;
+    }
+
     public class TriggerEventRegistration
     {
         public string Id;
+
+        public string Type;
 
         public IDictionary<string, object> TriggerData;
 

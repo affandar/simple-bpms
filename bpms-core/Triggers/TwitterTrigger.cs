@@ -30,7 +30,7 @@
             this.eventTriggerMap = new Dictionary<string, TwitterEventTrigger>();
         }
 
-        public string Name
+        public string Type
         {
             get { return "Twitter"; }
         }

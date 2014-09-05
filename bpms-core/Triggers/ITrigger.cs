@@ -4,7 +4,7 @@
 
     public interface ITrigger
     {
-        string Name { get; }
+        string Type { get; }
 
         void RegisterEventTrigger(TriggerManager manager, TriggerEventRegistration registration);
 

@@ -27,25 +27,25 @@
 
         public void AddTrigger(ITrigger trigger)
         {
-            this.triggerMap.Add(trigger.Name, trigger);
+            this.triggerMap.Add(trigger.Type, trigger);
         }
 
-        public void RegisterTriggerEvent(string triggerName, TriggerEventRegistration eventRegistration)
+        public void RegisterTriggerEvent(TriggerEventRegistration eventRegistration)
         {
-            this.GetTriggerOrThrow(triggerName).RegisterEventTrigger(this, eventRegistration);
+            this.GetTriggerOrThrow(eventRegistration.Type).RegisterEventTrigger(this, eventRegistration);
         }
 
-        public void UnregisterTriggerEvent(string triggerName, string registrationId)
+        public void UnregisterTriggerEvent(string triggerType, string registrationId)
         {
-            this.GetTriggerOrThrow(triggerName).UnregisterEventTrigger(registrationId);
+            this.GetTriggerOrThrow(triggerType).UnregisterEventTrigger(registrationId);
         }
 
-        ITrigger GetTriggerOrThrow(string triggerName)
+        ITrigger GetTriggerOrThrow(string triggerType)
         {
             ITrigger trigger = null;
-            if (!this.triggerMap.TryGetValue(triggerName, out trigger))
+            if (!this.triggerMap.TryGetValue(triggerType, out trigger))
             {
-                throw new InvalidOperationException("Unknown trigger: " + triggerName);
+                throw new InvalidOperationException("Unknown trigger: " + triggerType);
             }
 
             return trigger;

@@ -4,11 +4,13 @@
     using System.Collections.Generic;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Converters;
+    using Simple.Bpms.Triggers;
 
     public class BpmsFlow
     {
         public string Name;
         public string Version;
+        public BpmsTrigger Trigger;
         public IList<string> InputParameterBindings;
         public IList<BpmsNode> Nodes;
     }

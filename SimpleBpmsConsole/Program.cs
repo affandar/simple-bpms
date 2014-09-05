@@ -38,7 +38,7 @@
             repositoryStore.CreateRepositoryIfNotExists();
             repository = new BpmsRepository(repositoryStore);
 
-            //host = CreateClient();
+            host = CreateClient();
 
             if (invokedVerb == "start-flow")
             {

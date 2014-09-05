@@ -38,7 +38,7 @@
             repositoryStore.CreateRepositoryIfNotExists();
 
             BpmsRepository repository = new BpmsRepository(repositoryStore);
-      
+
 
             repository.AddConnector("EmailTask", "1.0", typeof(EmailTask));
             repository.AddConnector("SentimentAnalysisTask", "1.0", typeof(SentimentAnalysisTask));
@@ -47,16 +47,9 @@
             repository.AddConnector("SalesForceCreateRecordTask", "1.0", typeof(SalesForceCreateRecordTask));
             repository.AddConnector("KpiTask", "1.0", typeof(KpiTask));
 
-<<<<<<< HEAD
-            //File.WriteAllText("c:\\workshop\\TwitterSentimentFlow.json", DefaultBpmsFlows.GetSerializedFlow(DefaultBpmsFlows.TwitterSentimentFlow));
-            repository.AddDslFlow(DefaultBpmsFlows.TwitterSentimentFlow.Name,
+           /* repository.AddDslFlow(DefaultBpmsFlows.TwitterSentimentFlow.Name,
                 DefaultBpmsFlows.TwitterSentimentFlow.Version,
                 DefaultBpmsFlows.GetSerializedFlow(DefaultBpmsFlows.TwitterSentimentFlow));
-=======
-            //repository.AddDslFlow(DefaultBpmsFlows.TwitterSentimentFlow.Name,
-            //    DefaultBpmsFlows.TwitterSentimentFlow.Version,
-            //    DefaultBpmsFlows.GetSerializedFlow(DefaultBpmsFlows.TwitterSentimentFlow));
->>>>>>> da77f2fef2bc35e758295758273f43182efa11d9
 
             repository.AddDslFlow(DefaultBpmsFlows.TwitterSentimentSalesForceFlow.Name,
                 DefaultBpmsFlows.TwitterSentimentSalesForceFlow.Version,
@@ -64,7 +57,7 @@
 
             repository.AddDslFlow(DefaultBpmsFlows.TwitterSentimentSalesForceWithKpiFlow.Name,
                 DefaultBpmsFlows.TwitterSentimentSalesForceWithKpiFlow.Version,
-                DefaultBpmsFlows.GetSerializedFlow(DefaultBpmsFlows.TwitterSentimentSalesForceWithKpiFlow));
+                DefaultBpmsFlows.GetSerializedFlow(DefaultBpmsFlows.TwitterSentimentSalesForceWithKpiFlow)); */
 
             WorkflowLazyLoadObjectManager orchestrationManager = new WorkflowLazyLoadObjectManager(repository);
             ActivityLazyLoadObjectManager activityManager = new ActivityLazyLoadObjectManager(repository);

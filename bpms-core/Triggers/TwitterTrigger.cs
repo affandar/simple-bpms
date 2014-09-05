@@ -73,7 +73,7 @@
             eventTriggerMap.Add(registration.Id, eventTrigger);
 
             // TODO : make true async
-            eventTrigger.StartAsync().Wait();
+            eventTrigger.StartAsync();
         }
 
         public void UnregisterEventTrigger(string registrationId)

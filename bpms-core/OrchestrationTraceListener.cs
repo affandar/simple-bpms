@@ -1,12 +1,12 @@
 ﻿
-namespace bpms_core_test
+namespace Simple.Bpms
 {
     using System;
     using System.Diagnostics;
     using System.Globalization;
     using System.Linq;
 
-    public class OrchestrationConsoleTraceListener : ConsoleTraceListener
+    public class OrchestrationTraceListener : ConsoleTraceListener
     {
         public override void TraceEvent(TraceEventCache eventCache, string source, TraceEventType eventType, int id, string message)
         {

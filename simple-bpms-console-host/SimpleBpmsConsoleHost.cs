@@ -59,6 +59,10 @@
                 DefaultBpmsFlows.TwitterSentimentSalesForceWithKpiFlow.Version,
                 DefaultBpmsFlows.GetSerializedFlow(DefaultBpmsFlows.TwitterSentimentSalesForceWithKpiFlow)); */
 
+            //File.WriteAllText("c:\\workshop\\TwitterSentimentSalesforceFlow.json", DefaultBpmsFlows.GetSerializedFlow(DefaultBpmsFlows.TwitterSentimentSalesForceFlow));
+            //File.WriteAllText("c:\\workshop\\TwitterSentimentSalesForceWithKpiFlow.json", DefaultBpmsFlows.GetSerializedFlow(DefaultBpmsFlows.TwitterSentimentSalesForceWithKpiFlow));
+
+
             WorkflowLazyLoadObjectManager orchestrationManager = new WorkflowLazyLoadObjectManager(repository);
             ActivityLazyLoadObjectManager activityManager = new ActivityLazyLoadObjectManager(repository);
             this.worker = new SimpleBpmsWorker(repository, ServiceBusConnectionString, StorageConnectionString,

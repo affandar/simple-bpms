@@ -1,10 +1,10 @@
-﻿{
-  "Name": "TwitterSentimentFlow",
+{
+  "Name": "TwitterSentimentSalesForceFlow",
   "Version": "1.0",
   "Trigger": {
     "Type": "Twitter",
     "TriggerData": {
-      "hashtag": "inqilab"
+      "hashtag": "AcmeComputers"
     }
   },
   "InputParameterBindings": null,
@@ -34,7 +34,7 @@
         "2": {
           "Key": "sentiment_score",
           "Operator": "GTE",
-          "Value": "0"
+          "Value": "2"
         },
         "3": {
           "Key": "sentiment_score",
@@ -50,8 +50,21 @@
       "InputParameterBindings": {
         "from": "bpms@bpms.org",
         "to": "affandar@microsoft.com",
-        "subject": "Sentiment score is: %sentiment_score%!",
-       "body": "Congratulations! Received high sentiment score of: %sentiment_score%! tweet: %tweet_body%"
+        "subject": "New Sales Lead: @%tweet_from%",
+        "body": "New sales lead. Sentiment Score: %sentiment_score% Tweet: %tweet_body%"
+      },
+      "ChildTaskIds": [
+        5
+      ],
+      "ChildTaskSelectors": null
+    },
+    {
+      "Id": 5,
+      "TaskName": "SalesForceCreateRecordTask",
+      "TaskVersion": "1.0",
+      "InputParameterBindings": {
+        "last_name": "@%tweet_from%",
+        "description": "User @%tweet_from% expressed interest in AcmeComputers."
       },
       "ChildTaskIds": null,
       "ChildTaskSelectors": null
@@ -76,8 +89,8 @@
       "InputParameterBindings": {
         "from": "bpms@bpms.org",
         "to": "affandar@microsoft.com",
-        "subject": "Pay attention: %sentiment_score%!",
-        "body": "Bad news. Sentiment score: %sentiment_score%. Someone said: %processed_text%"
+        "subject": "Negative feedback: @%tweet_from%",
+        "body": "Negative tweet from @%tweet_from%. Sentiment score: %sentiment_score%. Tweet: %processed_text%"
       },
       "ChildTaskIds": null,
       "ChildTaskSelectors": null

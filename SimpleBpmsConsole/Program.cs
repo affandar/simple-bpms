@@ -7,6 +7,7 @@
     using System.ServiceModel;
     using System.Text;
     using System.Threading.Tasks;
+    using Newtonsoft.Json;
     using Simple.Bpms;
     using simple_bpms_console_host;
     
@@ -44,7 +45,8 @@
             if (invokedVerb == "start-flow")
             {
                 StartFlowOptions startFlowOptions = (StartFlowOptions) invokedVerbInstance;
-                repository.AddDslFlow(startFlowOptions.Name, startFlowOptions.Version, File.ReadAllText(startFlowOptions.DslFile));
+                repository.AddDslFlow(startFlowOptions.Name, startFlowOptions.Version, 
+                    FixupBpmsFlow(File.ReadAllText(startFlowOptions.DslFile), startFlowOptions.Name, startFlowOptions.Version));
                 host.StartBpmsFlowAsync(startFlowOptions.Name, startFlowOptions.Version).Wait();
             }
             else if (invokedVerb == "stop-flow")
@@ -60,6 +62,15 @@
                     PrintFlowInfo(flowItem, listOptions.Verbose);
                 }
             }
+        }
+
+        static string FixupBpmsFlow(string flow, string name, string version)
+        {
+            BpmsFlow desFlow = JsonConvert.DeserializeObject<BpmsFlow>(flow);
+            desFlow.Name = name;
+            desFlow.Version = version;
+
+            return JsonConvert.SerializeObject(desFlow);
         }
 
         public static ISimpleBpmsHost CreateClient()

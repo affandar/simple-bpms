@@ -16,7 +16,10 @@
         public ListOptions ListFlowsVerb { get; set; }
 
         [VerbOption("execution-count", HelpText = "Get execution count of a particular flow type.")]
-        public ExecutionCountOptions ExecutionCountverb { get; set; }
+        public ExecutionCountOptions ExecutionCountVerb { get; set; }
+
+        [VerbOption("get-stats", HelpText = "Get Statistics data for bpm flows.")]
+        public GetAnalyticsOptions GetAnalyticsVerb { get; set; }
     }
 
     class NameVersionOptions
@@ -46,6 +49,11 @@
     }
 
     class ExecutionCountOptions : NameVersionOptions
+    {
+
+    }
+
+    class GetAnalyticsOptions : NameVersionOptions
     {
 
     }

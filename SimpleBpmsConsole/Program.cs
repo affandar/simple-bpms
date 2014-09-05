@@ -9,6 +9,7 @@
     using System.Threading.Tasks;
     using Microsoft.ServiceBus.DurableTask;
     using Newtonsoft.Json;
+    using Newtonsoft.Json.Linq;
     using Simple.Bpms;
     using simple_bpms_console_host;
     
@@ -89,7 +90,31 @@
                 Console.WriteLine(string.Format("Running Flows   : {0}", runningExecutionCount));
                 Console.WriteLine(string.Format("Completed Flows : {0}", completedExecutionCount));
                 Console.WriteLine(string.Format("Failed Flows    : {0}", failedExecutionCount));
-            } 
+            }
+            else if (invokedVerb == "get-stats")
+            {
+                GetAnalyticsOptions statsOptions = (GetAnalyticsOptions)invokedVerbInstance;
+                OrchestrationStateQuery executionCountQuery = new OrchestrationStateQuery()
+                    .AddNameVersionFilter(statsOptions.Name, statsOptions.Version)
+                    .AddStatusFilter(OrchestrationStatus.Completed);
+                int completedExecutionCount = taskhubClient.QueryOrchestrationStates(executionCountQuery).Count();
+
+                executionCountQuery = new OrchestrationStateQuery()
+                    .AddNameVersionFilter(statsOptions.Name, statsOptions.Version)
+                    .AddStatusFilter(OrchestrationStatus.Running);
+                int runningExecutionCount = taskhubClient.QueryOrchestrationStates(executionCountQuery).Count();
+
+                executionCountQuery = new OrchestrationStateQuery()
+                    .AddNameVersionFilter(statsOptions.Name, statsOptions.Version)
+                    .AddStatusFilter(OrchestrationStatus.Failed);
+                int failedExecutionCount = taskhubClient.QueryOrchestrationStates(executionCountQuery).Count();
+
+                Console.WriteLine(string.Format("Running Flows   : {0}", runningExecutionCount));
+                Console.WriteLine(string.Format("Completed Flows : {0}", completedExecutionCount));
+                Console.WriteLine(string.Format("Failed Flows    : {0}", failedExecutionCount));
+
+                ShowAnalytics(statsOptions);
+            }
         }
 
         static string FixupBpmsFlow(string flow, string name, string version)
@@ -128,7 +153,45 @@
                     Console.WriteLine(dslFlowItem.Dsl);
                 }
             }
+        }
 
+        public static void ShowAnalytics(GetAnalyticsOptions options)
+        {
+            OrchestrationStateQuery executionCountQuery = new OrchestrationStateQuery()
+                .AddNameVersionFilter(options.Name, options.Version)
+                .AddStatusFilter(OrchestrationStatus.Completed);
+
+            IDictionary<string, int> stats = new Dictionary<string, int>();
+            foreach (var state in taskhubClient.QueryOrchestrationStates(executionCountQuery))
+            {
+                BpmsOrchestrationOutput output = JsonConvert.DeserializeObject<BpmsOrchestrationOutput>(state.Output);
+                if (output != null && output.OutputParameters != null) 
+                {
+                    foreach(var kvp in output.OutputParameters) 
+                    {
+                        if (!string.IsNullOrWhiteSpace(kvp.Key) && kvp.Key.StartsWith("counter:")) 
+                        {
+                            string[] parts = kvp.Key.Split(':');
+                            string counterName = parts[1];
+                            int counterValue = int.Parse(kvp.Value);
+                            int currentValue = 0;
+                            if (stats.TryGetValue(counterName, out currentValue)) 
+                            {
+                                stats[counterName] = stats[counterName] + currentValue;
+                            }
+                            else
+                            {
+                                stats.Add(counterName, counterValue);
+                            }
+                        }
+                    }
+                }
+            }
+
+            foreach (var metric in stats)
+            {
+                Console.WriteLine(string.Format("{0}: {1}", metric.Key, metric.Value));
+            }
         }
     }
 }

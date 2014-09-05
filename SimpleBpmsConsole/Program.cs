@@ -109,6 +109,10 @@
                     .AddStatusFilter(OrchestrationStatus.Failed);
                 int failedExecutionCount = taskhubClient.QueryOrchestrationStates(executionCountQuery).Count();
 
+                Console.WriteLine("\n**************************");
+                Console.WriteLine("Operational Metrics");
+                Console.WriteLine("**************************");
+
                 Console.WriteLine(string.Format("Running Flows   : {0}", runningExecutionCount));
                 Console.WriteLine(string.Format("Completed Flows : {0}", completedExecutionCount));
                 Console.WriteLine(string.Format("Failed Flows    : {0}", failedExecutionCount));
@@ -162,7 +166,8 @@
                 .AddStatusFilter(OrchestrationStatus.Completed);
 
             IDictionary<string, int> stats = new Dictionary<string, int>();
-            foreach (var state in taskhubClient.QueryOrchestrationStates(executionCountQuery))
+            var states = taskhubClient.QueryOrchestrationStates(executionCountQuery);
+            foreach (var state in states)
             {
                 BpmsOrchestrationOutput output = JsonConvert.DeserializeObject<BpmsOrchestrationOutput>(state.Output);
                 if (output != null && output.OutputParameters != null) 
@@ -177,7 +182,7 @@
                             int currentValue = 0;
                             if (stats.TryGetValue(counterName, out currentValue)) 
                             {
-                                stats[counterName] = stats[counterName] + currentValue;
+                                stats[counterName] = currentValue + counterValue;
                             }
                             else
                             {
@@ -187,6 +192,10 @@
                     }
                 }
             }
+
+            Console.WriteLine("\n**************************");
+            Console.WriteLine("Business KPIs");
+            Console.WriteLine("**************************");
 
             foreach (var metric in stats)
             {

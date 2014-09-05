@@ -5,12 +5,13 @@
     using Microsoft.ServiceBus.DurableTask;
 
     /// <summary>
-    /// INPUT:
-    ///     key : value = 'text' : the text that we want to run analysis on
-    ///     
-    /// OUTPUT:
-    ///     key : value = 'sentiment_score' : the sentiment score, +ve numbers are good sentiment, -ve bad
+    /// Input Metadata:
+    ///     text (string)
     /// 
+    /// Output Metadata:
+    ///     sentiment_score (int)
+    ///     
+    /// This metadata should be uploaded and availabe in the Store
     /// </summary>
     public class SentimentAnalysisTask : BpmsTask
     {

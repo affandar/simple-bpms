@@ -7,17 +7,21 @@
     using System.ServiceModel;
     using System.Text;
     using System.Threading.Tasks;
+    using Microsoft.ServiceBus.DurableTask;
     using Newtonsoft.Json;
     using Simple.Bpms;
     using simple_bpms_console_host;
     
     class Program
     {
+        const string HubName = "SimpleBpms";
         public const string StorageConnectionString = "UseDevelopmentStorage=true;";
+        public const string ServiceBusConnectionString = "Endpoint=sb://bpmsdemo.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=QIpu3lnEeB0LFbp3N+tIAt70FS97TrpKb1OKUaqUY4E=";
 
         static Options options = new Options();
         static ISimpleBpmsHost host;
         static BpmsRepository repository;
+        static TaskHubClient taskhubClient;
 
         static void Main(string[] args)
         {
@@ -42,6 +46,8 @@
 
             host = CreateClient();
 
+            taskhubClient = new TaskHubClient(HubName, ServiceBusConnectionString, StorageConnectionString);
+
             if (invokedVerb == "start-flow")
             {
                 StartFlowOptions startFlowOptions = (StartFlowOptions) invokedVerbInstance;
@@ -61,6 +67,18 @@
                 {
                     PrintFlowInfo(flowItem, listOptions.Verbose);
                 }
+            }
+            else if (invokedVerb == "execution-count")
+            {
+                ExecutionCountOptions executionCountOptions = (ExecutionCountOptions)invokedVerbInstance;
+                OrchestrationStateQuery executionCountQuery = new OrchestrationStateQuery()
+                    .AddNameVersionFilter(executionCountOptions.Name, executionCountOptions.Version)
+                    .AddStatusFilter(OrchestrationStatus.Completed);
+                int executionCount = taskhubClient.QueryOrchestrationStates(executionCountQuery).Count();
+
+                Console.WriteLine(string.Format("Total completed executions of flow type '{0}_{1}': {2}", 
+                    executionCountOptions.Name, executionCountOptions.Version, executionCount));
+
             }
         }
 

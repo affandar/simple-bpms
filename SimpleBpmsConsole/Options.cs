@@ -13,7 +13,10 @@
         public StopFlowOptions StopFlowVerb { get; set; }
 
         [VerbOption("list-flows", HelpText = "List all registered flows.")]
-        public ListOptions ListFlows { get; set; }
+        public ListOptions ListFlowsVerb { get; set; }
+
+        [VerbOption("execution-count", HelpText = "Get execution count of a particular flow type.")]
+        public ExecutionCountOptions ExecutionCountverb { get; set; }
     }
 
     class NameVersionOptions
@@ -40,5 +43,10 @@
     {
         [Option('v', "verbose", HelpText = "Print all options.")]
         public bool Verbose { get; set; }
+    }
+
+    class ExecutionCountOptions : NameVersionOptions
+    {
+
     }
 }

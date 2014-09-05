@@ -36,8 +36,9 @@
 
             RepositoryAzureTableStore repositoryStore = new RepositoryAzureTableStore("repository", StorageConnectionString);
             repositoryStore.CreateRepositoryIfNotExists();
+            repository = new BpmsRepository(repositoryStore);
 
-            host = CreateClient();
+            //host = CreateClient();
 
             if (invokedVerb == "start-flow")
             {
@@ -50,6 +51,14 @@
                 StopFlowOptions stopFlowOptions = (StopFlowOptions)invokedVerbInstance;
                 host.StopBpmsFlowAsync(stopFlowOptions.Name, stopFlowOptions.Version).Wait();
             }
+            else if (invokedVerb == "list-flows")
+            {
+                ListOptions listOptions = (ListOptions)invokedVerbInstance;
+                foreach (var flowItem in repository.GetFlows())
+                {
+                    PrintFlowInfo(flowItem, listOptions.Verbose);
+                }
+            }
         }
 
         public static ISimpleBpmsHost CreateClient()
@@ -59,6 +68,26 @@
             ChannelFactory<ISimpleBpmsHost> channelFactory = new ChannelFactory<ISimpleBpmsHost>(binding, remoteAddress);
             channelFactory.Open();
             return channelFactory.CreateChannel();
+        }
+
+        public static void PrintFlowInfo(BpmsFlowRepositoryItem flowItem, bool verbose)
+        {
+            string flowInfo = string.Format("Name: {0}, Version: {1}, Type: {2}", flowItem.Name, flowItem.Version, flowItem.ItemType.ToString());
+            Console.WriteLine(flowInfo);
+            if (verbose)
+            {
+                if (flowItem.ItemType == ItemType.CodeFlow)
+                {
+                    BpmsCodeFlowRepositoryItem codeFlowItem = (BpmsCodeFlowRepositoryItem)flowItem;
+                    Console.WriteLine(string.Format("AssemblyName: {0}, TypeName: {1}", codeFlowItem.AssemblyName, codeFlowItem.TypeName));
+                }
+                else if (flowItem.ItemType == ItemType.DSLFlow)
+                {
+                    BpmsDslFlowRepositoryItem dslFlowItem = (BpmsDslFlowRepositoryItem)flowItem;
+                    Console.WriteLine("DSL Source:", dslFlowItem.Dsl);
+                }
+            }
+
         }
     }
 }

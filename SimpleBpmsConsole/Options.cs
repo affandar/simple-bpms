@@ -11,6 +11,9 @@
 
         [VerbOption("stop-flow", HelpText = "Stop user defined bpm flow.")]
         public StopFlowOptions StopFlowVerb { get; set; }
+
+        [VerbOption("list-flows", HelpText = "List all registered flows.")]
+        public ListOptions ListFlows { get; set; }
     }
 
     class NameVersionOptions
@@ -31,5 +34,11 @@
     class StopFlowOptions : NameVersionOptions
     {
         
+    }
+
+    class ListOptions
+    {
+        [Option('v', "verbose", HelpText = "Print all options.")]
+        public bool Verbose { get; set; }
     }
 }

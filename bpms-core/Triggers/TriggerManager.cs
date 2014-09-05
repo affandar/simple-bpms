@@ -17,12 +17,8 @@
 
         public void CreateBpmsFlow(BpmsFlow flow, IDictionary<string, string> inputParameters)
         {
-            BpmsOrchestrationInput input = new BpmsOrchestrationInput();
-            input.Flow = flow;
-            input.InputParameterBindings = inputParameters;
-
             // TODO : wait?!
-            this.worker.CreateBpmsFlowInstanceAsync(input).Wait();
+            this.worker.CreateBpmsFlowInstanceAsync(flow.Name, flow.Version, inputParameters).Wait();
         }
 
         public void AddTrigger(ITrigger trigger)

@@ -102,14 +102,17 @@
             //     JsonConvert.SerializeObject(flow, Formatting.Indented, 
             //     new JsonSerializerSettings() { NullValueHandling = NullValueHandling.Ignore}));
 
-            BpmsRepository repository = new BpmsRepository(string.Empty);
+            RepositoryAzureTableStore repositoryStore = new RepositoryAzureTableStore("repository", StorageConnectionString);
+            BpmsRepository repository = new BpmsRepository(repositoryStore);
             repository.AddConnector("EmailTask", "1.0", typeof(EmailTask));
             repository.AddConnector("SentimentAnalysisTask", "1.0", typeof(SentimentAnalysisTask));
             repository.AddConnector("TextProcessingTask", "1.0", typeof(TextProcessingTask));
             repository.AddConnector("HttpCalloutTask", "1.0", typeof(HttpCalloutTask));
 
-
-            SimpleBpmsWorker bpmsWorker = new SimpleBpmsWorker(repository, ServiceBusConnectionString, StorageConnectionString);
+            WorkflowLazyLoadObjectManager orchestrationManager = new WorkflowLazyLoadObjectManager(repository);
+            ActivityLazyLoadObjectManager activityManager = new ActivityLazyLoadObjectManager(repository);
+            SimpleBpmsWorker bpmsWorker = new SimpleBpmsWorker(repository, ServiceBusConnectionString, StorageConnectionString,
+                orchestrationManager, activityManager);
 
             // TODO : triggers should also be part of the repository
             bpmsWorker.RegisterBpmsTrigger(new TwitterTrigger());

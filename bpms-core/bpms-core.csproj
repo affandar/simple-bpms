@@ -115,8 +115,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BpmsFlow.cs" />
-    <Compile Include="Tasks\BpmsTaskException.cs" />
+    <Compile Include="LazyLoadObjectManager.cs" />
+    <Compile Include="RepositoryAzureTableStore.cs" />
     <Compile Include="Tasks\BpmsTask.cs" />
+    <Compile Include="Tasks\BpmsTaskException.cs" />
     <Compile Include="Triggers\TwitterTrigger.cs" />
     <Compile Include="Utils.cs" />
     <Compile Include="BpmsOrchestrationOutput.cs" />

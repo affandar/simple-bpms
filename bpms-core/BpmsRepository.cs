@@ -13,13 +13,15 @@
 
     public class BpmsRepository
     {
-        string repositoryPath;
+        RepositoryAzureTableStore repositoryStore;
         IDictionary<string, BpmsConnectorRepositoryItem> connectors;
+        IDictionary<string, BpmsFlowRepositoryItem> flows;
 
-        public BpmsRepository(string repositoryPath)
+        public BpmsRepository(RepositoryAzureTableStore repositoryStore)
         {
-            this.repositoryPath = repositoryPath;
+            this.repositoryStore = repositoryStore;
             this.connectors = new Dictionary<string, BpmsConnectorRepositoryItem>();
+            this.flows = new Dictionary<string, BpmsFlowRepositoryItem>();
 
             Initialize();
         }
@@ -31,8 +33,31 @@
 
         public void AddConnector(string name, string version, string assemblyName, string typeName)
         {
-            BpmsConnectorRepositoryItem repositoryItem = new BpmsBasicConnectorRepositoryItem(name, version, assemblyName, typeName);
+            BpmsCodeConnectorRepositoryItem repositoryItem = new BpmsCodeConnectorRepositoryItem(name, version, assemblyName, typeName);
             this.connectors.Add(repositoryItem.GetItemKey(), repositoryItem);
+
+            this.repositoryStore.AddCodeConnector(repositoryItem);
+        }
+
+        public void AddCodeFlow(string name, string version, Type taskOrchestrationType)
+        {
+            this.AddConnector(name, version, taskOrchestrationType.Assembly.FullName, taskOrchestrationType.FullName);
+        }
+
+        public void AddCodeFlow(string name, string version, string assemblyName, string typeName)
+        {
+            BpmsCodeFlowRepositoryItem repositoryItem = new BpmsCodeFlowRepositoryItem(name, version, assemblyName, typeName);
+            this.flows.Add(repositoryItem.GetItemKey(), repositoryItem);
+
+            this.repositoryStore.AddCodeFlow(repositoryItem);
+        }
+
+        public void AddDslFlow(string name, string version, string dsl)
+        {
+            BpmsDslFlowRepositoryItem repositoryItem = new BpmsDslFlowRepositoryItem(name, version, dsl);
+            this.flows.Add(repositoryItem.GetItemKey(), repositoryItem);
+
+            this.repositoryStore.AddDslFlow(repositoryItem);
         }
 
         public IEnumerable<BpmsConnectorRepositoryItem> GetConnectors()
@@ -40,30 +65,76 @@
             return this.connectors.Values;
         }
 
-        void Initialize()
+        public IEnumerable<BpmsFlowRepositoryItem> GetFlows()
         {
-            if (!string.IsNullOrWhiteSpace(this.repositoryPath) && File.Exists(this.repositoryPath))
+            return this.flows.Values;
+        }
+
+        public BpmsConnectorRepositoryItem GetConnector(string name, string version)
+        {
+            string key = GetKey(name, version);
+            BpmsConnectorRepositoryItem connector = null;
+            if (!this.connectors.TryGetValue(key, out connector)) 
             {
-                var root = JObject.Parse(File.ReadAllText(this.repositoryPath));
-                foreach (var connector in root["connectors"])
+                connector = this.repositoryStore.GetConnector(name, version);
+                if (connector != null) 
                 {
-                    BpmsConnectorRepositoryItem repositoryItem = new BpmsBasicConnectorRepositoryItem(connector);
-                    this.connectors.Add(repositoryItem.GetItemKey(), repositoryItem);
+                    this.connectors.Add(key, connector);
                 }
             }
+
+            return connector;
+        }
+
+        public BpmsFlowRepositoryItem GetFlow(string name, string version)
+        {
+            string key = GetKey(name, version);
+            BpmsFlowRepositoryItem flow = null;
+            if (!this.flows.TryGetValue(key, out flow)) 
+            {
+                flow = this.repositoryStore.GetFlow(name, version);
+                if (flow != null) 
+                {
+                    this.flows.Add(key, flow);
+                }
+            }
+
+            return flow;
+        }
+
+        void Initialize()
+        {
+            if (this.repositoryStore != null)
+            {
+                foreach (var connector in this.repositoryStore.GetAllConnectors())
+                {
+                    this.connectors.Add(connector.GetItemKey(), connector);
+                }
+
+                foreach (var flow in this.repositoryStore.GetAllFlows())
+                {
+                    this.flows.Add(flow.GetItemKey(), flow);
+                }
+            }
+        }
+
+        public static string GetKey(string name, string version)
+        {
+            return name + "_" + version;
         }
     }
 
     public enum ItemType
     {
-        Basic,
+        CodeConnector,
+        CodeFlow,
+        DSLFlow,
     }
 
-    public abstract class BpmsConnectorRepositoryItem
+    public abstract class BpmsRepositoryItem
     {
-        public abstract ItemType ItemType { get; }
 
-        public abstract ObjectCreator<TaskActivity> CreateFactory();
+        public abstract ItemType ItemType { get; }
 
         public string Name { get; protected set; }
 
@@ -75,10 +146,22 @@
         }
     }
 
-    public class BpmsBasicConnectorRepositoryItem : BpmsConnectorRepositoryItem
+    public abstract class BpmsConnectorRepositoryItem : BpmsRepositoryItem
     {
 
-        public BpmsBasicConnectorRepositoryItem(JToken connector)
+        public abstract ObjectCreator<TaskActivity> CreateFactory();
+    }
+
+    public abstract class BpmsFlowRepositoryItem : BpmsRepositoryItem
+    {
+
+        public abstract ObjectCreator<TaskOrchestration> CreateFactory();
+    }
+
+    public class BpmsCodeConnectorRepositoryItem : BpmsConnectorRepositoryItem
+    {
+
+        public BpmsCodeConnectorRepositoryItem(JToken connector)
         {
             this.Name = (string)connector["name"];
             this.Version = (string)connector["version"];
@@ -86,7 +169,7 @@
             this.TypeName = (string)connector["type_name"];
         }
 
-        public BpmsBasicConnectorRepositoryItem(string name, string version, string assemblyName, string typeName)
+        public BpmsCodeConnectorRepositoryItem(string name, string version, string assemblyName, string typeName)
         {
             this.Name = name;
             this.Version = version;
@@ -102,7 +185,7 @@
         {
             get
             {
-                return ItemType.Basic;
+                return ItemType.CodeConnector;
             }
         }
 
@@ -112,6 +195,81 @@
             TaskActivity activity = (TaskActivity) handle.Unwrap();
 
             ObjectCreator<TaskActivity> creator = new NameValueObjectCreator<TaskActivity>(this.Name, this.Version, activity);
+
+            return creator;
+        }
+    }
+
+    public class BpmsCodeFlowRepositoryItem : BpmsFlowRepositoryItem
+    {
+        public BpmsCodeFlowRepositoryItem(JToken connector)
+        {
+            this.Name = (string)connector["name"];
+            this.Version = (string)connector["version"];
+            this.AssemblyName = (string)connector["assembly_name"];
+            this.TypeName = (string)connector["type_name"];
+        }
+
+        public BpmsCodeFlowRepositoryItem(string name, string version, string assemblyName, string typeName)
+        {
+            this.Name = name;
+            this.Version = version;
+            this.AssemblyName = assemblyName;
+            this.TypeName = typeName;
+        }
+
+        public string AssemblyName { get; private set; }
+
+        public string TypeName { get; set; }
+
+        public override ItemType ItemType
+        {
+            get
+            {
+                return ItemType.CodeFlow;
+            }
+        }
+
+        public override ObjectCreator<TaskOrchestration> CreateFactory()
+        {
+            Assembly workflowAssembly = Assembly.Load(this.AssemblyName);
+            Type workflowType = workflowAssembly.GetType(this.TypeName);
+
+            ObjectCreator<TaskOrchestration> creator = new NameValueObjectCreator<TaskOrchestration>(this.Name, this.Version, workflowType);
+
+            return creator;
+        }
+    }
+
+    public class BpmsDslFlowRepositoryItem : BpmsFlowRepositoryItem
+    {
+        public BpmsDslFlowRepositoryItem(JToken connector)
+        {
+            this.Name = (string)connector["name"];
+            this.Version = (string)connector["version"];
+            this.Dsl = (string)connector["dsl"];
+        }
+
+        public BpmsDslFlowRepositoryItem(string name, string version, string dsl)
+        {
+            this.Name = name;
+            this.Version = version;
+            this.Dsl = dsl;
+        }
+
+        public string Dsl { get; private set; }
+
+        public override ItemType ItemType
+        {
+            get
+            {
+                return ItemType.DSLFlow;
+            }
+        }
+
+        public override ObjectCreator<TaskOrchestration> CreateFactory()
+        {
+            ObjectCreator<TaskOrchestration> creator = new NameValueObjectCreator<TaskOrchestration>(this.Name, this.Version, typeof(BpmsOrchestration));
 
             return creator;
         }

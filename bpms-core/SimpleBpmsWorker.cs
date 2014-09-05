@@ -12,6 +12,7 @@
     using Microsoft.ServiceBus.DurableTask;
     using Microsoft.ServiceBus.Messaging;
     using Microsoft.WindowsAzure.Storage;
+    using Newtonsoft.Json;
     using Simple.Bpms.Triggers;
 
     // TODO : 
@@ -33,7 +34,8 @@
 
         TriggerManager triggerManager;
         
-        public SimpleBpmsWorker(BpmsRepository repository, string serviceBusConnectionString, string storageConnectionString)
+        public SimpleBpmsWorker(BpmsRepository repository, string serviceBusConnectionString, string storageConnectionString,
+            WorkflowLazyLoadObjectManager orchestrationManager, ActivityLazyLoadObjectManager activityManager)
         {
             this.repository = repository;
             var taskHubClientSettings = new TaskHubClientSettings();
@@ -64,7 +66,9 @@
                 HubName,
                 serviceBusConnectionString,
                 storageConnectionString,
-                workerSettings);
+                workerSettings,
+                orchestrationManager,
+                activityManager);
 
             this.taskHubWorker.AddTaskOrchestrations(typeof(BpmsOrchestration));
 
@@ -92,14 +96,24 @@
             this.triggerManager.AddTrigger(trigger);
         }
 
-        public void RegisterBpmsTaskActivity(string name, string version, Type taskActivityType)
+        public Task<OrchestrationInstance> CreateBpmsFlowInstanceAsync(string name, string version, IDictionary<string, string> inputParameters)
         {
-            this.repository.AddConnector(name, version, taskActivityType.Assembly.FullName, taskActivityType.FullName);
-        }
+            BpmsFlowRepositoryItem flow = this.repository.GetFlow(name, version);
+            if (flow == null)
+            {
+                throw new Exception(string.Format("Workflow with name '{0}' and version '{1}' does not exist in repository."));
+            }
 
-        public Task<OrchestrationInstance> CreateBpmsFlowInstanceAsync(BpmsOrchestrationInput input)
-        {
-            return this.taskHubClient.CreateOrchestrationInstanceAsync(typeof(BpmsOrchestration), input);
+            if (flow.ItemType == ItemType.DSLFlow) 
+            {
+                BpmsOrchestrationInput input = new BpmsOrchestrationInput();
+                input.Flow = JsonConvert.DeserializeObject<BpmsFlow>(((BpmsDslFlowRepositoryItem)flow).Dsl);
+                input.InputParameterBindings = inputParameters;
+
+                return this.taskHubClient.CreateOrchestrationInstanceAsync(name, version, input);
+            }
+
+            return this.taskHubClient.CreateOrchestrationInstanceAsync(name, version, inputParameters);
         }
 
         public Task<OrchestrationInstance> CreateCodeOrchestrationInstanceAsync(string name, string version, IDictionary<string, string> input)

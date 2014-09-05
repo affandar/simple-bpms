@@ -74,12 +74,22 @@
                 OrchestrationStateQuery executionCountQuery = new OrchestrationStateQuery()
                     .AddNameVersionFilter(executionCountOptions.Name, executionCountOptions.Version)
                     .AddStatusFilter(OrchestrationStatus.Completed);
-                int executionCount = taskhubClient.QueryOrchestrationStates(executionCountQuery).Count();
+                int completedExecutionCount = taskhubClient.QueryOrchestrationStates(executionCountQuery).Count();
 
-                Console.WriteLine(string.Format("Total completed executions of flow type '{0}_{1}': {2}", 
-                    executionCountOptions.Name, executionCountOptions.Version, executionCount));
+                executionCountQuery = new OrchestrationStateQuery()
+                    .AddNameVersionFilter(executionCountOptions.Name, executionCountOptions.Version)
+                    .AddStatusFilter(OrchestrationStatus.Running);
+                int runningExecutionCount = taskhubClient.QueryOrchestrationStates(executionCountQuery).Count();
 
-            }
+                executionCountQuery = new OrchestrationStateQuery()
+                    .AddNameVersionFilter(executionCountOptions.Name, executionCountOptions.Version)
+                    .AddStatusFilter(OrchestrationStatus.Failed);
+                int failedExecutionCount = taskhubClient.QueryOrchestrationStates(executionCountQuery).Count();
+
+                Console.WriteLine(string.Format("Running Flows   : {0}", runningExecutionCount));
+                Console.WriteLine(string.Format("Completed Flows : {0}", completedExecutionCount));
+                Console.WriteLine(string.Format("Failed Flows    : {0}", failedExecutionCount));
+            } 
         }
 
         static string FixupBpmsFlow(string flow, string name, string version)

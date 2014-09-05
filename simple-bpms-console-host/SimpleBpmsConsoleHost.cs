@@ -47,10 +47,16 @@
             repository.AddConnector("SalesForceCreateRecordTask", "1.0", typeof(SalesForceCreateRecordTask));
             repository.AddConnector("KpiTask", "1.0", typeof(KpiTask));
 
+<<<<<<< HEAD
             //File.WriteAllText("c:\\workshop\\TwitterSentimentFlow.json", DefaultBpmsFlows.GetSerializedFlow(DefaultBpmsFlows.TwitterSentimentFlow));
             repository.AddDslFlow(DefaultBpmsFlows.TwitterSentimentFlow.Name,
                 DefaultBpmsFlows.TwitterSentimentFlow.Version,
                 DefaultBpmsFlows.GetSerializedFlow(DefaultBpmsFlows.TwitterSentimentFlow));
+=======
+            //repository.AddDslFlow(DefaultBpmsFlows.TwitterSentimentFlow.Name,
+            //    DefaultBpmsFlows.TwitterSentimentFlow.Version,
+            //    DefaultBpmsFlows.GetSerializedFlow(DefaultBpmsFlows.TwitterSentimentFlow));
+>>>>>>> da77f2fef2bc35e758295758273f43182efa11d9
 
             repository.AddDslFlow(DefaultBpmsFlows.TwitterSentimentSalesForceFlow.Name,
                 DefaultBpmsFlows.TwitterSentimentSalesForceFlow.Version,

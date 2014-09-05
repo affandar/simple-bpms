@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.IO;
     using System.Linq;
     using System.ServiceModel;
     using System.Text;
@@ -43,7 +44,7 @@
             if (invokedVerb == "start-flow")
             {
                 StartFlowOptions startFlowOptions = (StartFlowOptions) invokedVerbInstance;
-                repository.AddDslFlow(startFlowOptions.Name, startFlowOptions.Version, startFlowOptions.DslFile);
+                repository.AddDslFlow(startFlowOptions.Name, startFlowOptions.Version, File.ReadAllText(startFlowOptions.DslFile));
                 host.StartBpmsFlowAsync(startFlowOptions.Name, startFlowOptions.Version).Wait();
             }
             else if (invokedVerb == "stop-flow")
@@ -84,7 +85,8 @@
                 else if (flowItem.ItemType == ItemType.DSLFlow)
                 {
                     BpmsDslFlowRepositoryItem dslFlowItem = (BpmsDslFlowRepositoryItem)flowItem;
-                    Console.WriteLine("DSL Source:", dslFlowItem.Dsl);
+                    Console.WriteLine("DSL Source:");
+                    Console.WriteLine(dslFlowItem.Dsl);
                 }
             }
 

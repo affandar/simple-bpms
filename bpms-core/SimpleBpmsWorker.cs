@@ -116,13 +116,16 @@
             return this.taskHubClient.CreateOrchestrationInstanceAsync(name, version, inputParameters);
         }
 
-        public Task<OrchestrationInstance> CreateCodeOrchestrationInstanceAsync(string name, string version, IDictionary<string, string> input)
+        public void StartBpmsFlow(string name, string version)
         {
-            return this.taskHubClient.CreateOrchestrationInstanceAsync(name, version, input);
-        }
+            var flowItem = this.repository.GetFlow(name, version);
+            if(flowItem.ItemType != ItemType.DSLFlow)
+            {
+                throw new NotSupportedException();
+            }
 
-        public void StartBpmsFlow(BpmsFlow flow)
-        {
+            BpmsFlow flow = JsonConvert.DeserializeObject<BpmsFlow>(((BpmsDslFlowRepositoryItem)flowItem).Dsl);
+
             if(this.flowMap.ContainsKey(flow.Name))
             {
                 throw new InvalidOperationException("Flow already exists: " + flow.Name);

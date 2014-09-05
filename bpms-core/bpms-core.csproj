@@ -118,7 +118,6 @@
     <Compile Include="LazyLoadObjectManager.cs" />
     <Compile Include="RepositoryAzureTableStore.cs" />
     <Compile Include="OrchestrationTraceListener.cs" />
-    <Compile Include="Tasks\BpmsTaskException.cs" />
     <Compile Include="Tasks\BpmsTask.cs" />
     <Compile Include="Tasks\BpmsTaskException.cs" />
     <Compile Include="Triggers\TwitterTrigger.cs" />

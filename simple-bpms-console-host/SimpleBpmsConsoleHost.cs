@@ -32,13 +32,24 @@
 
         public void StartWcfService()
         {
-            BpmsRepository repository = new BpmsRepository(string.Empty);
+            RepositoryAzureTableStore repositoryStore = new RepositoryAzureTableStore("repository", StorageConnectionString);
+            repositoryStore.CreateRepositoryIfNotExists();
+
+            BpmsRepository repository = new BpmsRepository(repositoryStore);
+
             repository.AddConnector("EmailTask", "1.0", typeof(EmailTask));
             repository.AddConnector("SentimentAnalysisTask", "1.0", typeof(SentimentAnalysisTask));
             repository.AddConnector("TextProcessingTask", "1.0", typeof(TextProcessingTask));
             repository.AddConnector("HttpCalloutTask", "1.0", typeof(HttpCalloutTask));
 
-            this.worker = new SimpleBpmsWorker(repository, ServiceBusConnectionString, StorageConnectionString);
+            repository.AddDslFlow(DefaultBpmsFlows.TwitterSentimentFlow.Name,
+                DefaultBpmsFlows.TwitterSentimentFlow.Version,
+                DefaultBpmsFlows.GetSerializedFlow(DefaultBpmsFlows.TwitterSentimentFlow));
+
+            WorkflowLazyLoadObjectManager orchestrationManager = new WorkflowLazyLoadObjectManager(repository);
+            ActivityLazyLoadObjectManager activityManager = new ActivityLazyLoadObjectManager(repository);
+            this.worker = new SimpleBpmsWorker(repository, ServiceBusConnectionString, StorageConnectionString,
+                     orchestrationManager, activityManager);
 
             // TODO : triggers should also be part of the repository
             this.worker.RegisterBpmsTrigger(new TwitterTrigger());
@@ -56,7 +67,7 @@
         public Task StartBpmsFlowAsync(string name, string version)
         {
             Console.WriteLine("[SIMPLE-BPMS-HOST] Starting BPMS Flow: " + name + " : " + version);
-            this.worker.StartBpmsFlow(DefaultBpmsFlows.TwitterSentimentFlow);
+            this.worker.StartBpmsFlow(name, version);
             return Task.FromResult<object>(null);
         }
 

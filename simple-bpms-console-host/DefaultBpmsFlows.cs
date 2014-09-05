@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 using Simple.Bpms;
 using Simple.Bpms.Triggers;
 
@@ -10,6 +11,11 @@ namespace simple_bpms_console_host
 {
     public static class DefaultBpmsFlows
     {
+        public static string GetSerializedFlow(BpmsFlow flow)
+        {
+            return JsonConvert.SerializeObject(flow);
+        }
+
         public static BpmsFlow TwitterSentimentFlow = new BpmsFlow()
         {
             Name = "TwitterSentimentFlow",

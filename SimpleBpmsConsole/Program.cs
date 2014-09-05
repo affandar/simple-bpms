@@ -16,7 +16,7 @@
 
             Console.ReadLine();
 
-            host.StartBpmsFlowAsync("sdfds", "dsfds").Wait();
+            host.StartBpmsFlowAsync("TwitterSentimentFlow", "1.0").Wait();
 
             Console.ReadLine();
 

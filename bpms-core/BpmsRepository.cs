@@ -62,12 +62,12 @@
 
         public IEnumerable<BpmsConnectorRepositoryItem> GetConnectors()
         {
-            return this.connectors.Values;
+            return this.repositoryStore.GetAllConnectors();
         }
 
         public IEnumerable<BpmsFlowRepositoryItem> GetFlows()
         {
-            return this.flows.Values;
+            return this.repositoryStore.GetAllFlows();
         }
 
         public BpmsConnectorRepositoryItem GetConnector(string name, string version)

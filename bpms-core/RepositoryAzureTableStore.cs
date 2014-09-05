@@ -205,7 +205,6 @@
             TableQuery query = new TableQuery
             {
                 FilterString = String.Format("PartitionKey eq '{0}'", partitionKey),
-                TakeCount = 1
             };
 
             foreach (var flowEntity in this.table.ExecuteQuery(query))
@@ -222,7 +221,6 @@
             query = new TableQuery
             {
                 FilterString = String.Format("PartitionKey eq '{0}'", partitionKey),
-                TakeCount = 1
             };
 
             foreach (var flowEntity in this.table.ExecuteQuery(query))

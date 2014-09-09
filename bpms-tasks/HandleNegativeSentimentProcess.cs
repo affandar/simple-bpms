@@ -1,5 +1,6 @@
 ﻿namespace Simple.Bpms.Tasks.SystemTasks
 {
+    using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
     using Microsoft.ServiceBus.DurableTask;
@@ -37,26 +38,39 @@
             };
 
             int count = 0;
+            bool runCompensation = false;
 
-            do
+            try
             {
-                var httpResponse = await context.ScheduleTask<IDictionary<string, string>>(
-                    "HttpCalloutTask", "1.0", httpCalloutTaskParameters);
-                
-                if (httpResponse["response_value"] == "issue_resolved")
+                do
                 {
-                    break;
-                }
+                    var httpResponse = await context.ScheduleTask<IDictionary<string, string>>(
+                        "HttpCalloutTask", "1.0", httpCalloutTaskParameters);
 
-                await context.ScheduleTask<IDictionary<string, string>>("EmailTask", "1.0", emailTaskInputParameters);
-                await context.CreateTimer<object>(context.CurrentUtcDateTime.AddSeconds(5), null);
+                    if (httpResponse["response_value"] == "issue_resolved")
+                    {
+                        break;
+                    }
 
-                if (count++ >= 2)
-                {
-                    httpCalloutTaskParameters["test_value"] = "issue_resolved";
+                    await context.ScheduleTask<IDictionary<string, string>>("EmailTask", "1.0", emailTaskInputParameters);
+                    await context.CreateTimer<object>(context.CurrentUtcDateTime.AddSeconds(5), null);
+
+                    if (count++ >= 2)
+                    {
+                        httpCalloutTaskParameters["test_value"] = "issue_resolved";
+                    }
                 }
+                while (true);
             }
-            while (true);
+            catch(Exception exception)
+            {
+                runCompensation = true;
+            }
+
+            if(runCompensation)
+            {
+                await context.ScheduleTask<IDictionary<string, string>>("EmailTask", "1.0", emailTaskInputParameters);
+            }
 
             // no output 
             return new Dictionary<string, string>() { { "counter:twitter_negative", "1" }  };

@@ -134,24 +134,5 @@
                 }
             }
         }
-
-        //// grab values from process variables if required
-        //IDictionary<string, string> ExpandBpmsTaskInputParameters(IDictionary<string, string> specifiedParameters)
-        //{
-        //    if(specifiedParameters != null)
-        //    {
-        //        IDictionary<string, string> clonedSpecifiedParameters = new Dictionary<string, string>(specifiedParameters);
-
-        //        // TODO : very ugly but gets the job done for now
-        //        foreach(var kvp in this.processVariables)
-        //        {
-        //            foreach(var paramKvp in clonedSpecifiedParameters)
-        //            {
-        //                specifiedParameters[paramKvp.Key] = paramKvp.Value.Replace("%" + kvp.Key + "%", kvp.Value);
-        //            }
-        //        }
-        //    }
-        //    return specifiedParameters;
-        //}
     }
 }

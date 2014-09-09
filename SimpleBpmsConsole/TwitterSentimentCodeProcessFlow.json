@@ -68,7 +68,7 @@
       "NodeType": null,
       "InputParameterBindings": {
         "last_name": "@%tweet_from%",
-        "description": "User @%tweet_from% expressed interest in AcmeComputers."
+        "description": "User @%tweet_from% tweeted: %tweet_body%."
       },
       "ChildTaskIds": [
         6

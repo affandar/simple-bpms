@@ -59,7 +59,7 @@
             while (true);
 
             // no output 
-            return new Dictionary<string, string>();
+            return new Dictionary<string, string>() { { "counter:twitter_negative", "1" }  };
         }
     }
 }

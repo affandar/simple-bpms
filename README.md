@@ -10,8 +10,9 @@ Device Management Query Sample Snippets
 
 # Table of Contents
 
--   [Introduction](#Introduction)
--   [Device Queries](#DeviceQueries)
+* [Introduction](#Introduction)
+* [Device Queries](#DeviceQueries)
+ * [Get all devices where the FirmwareVersion Device property is set to 1.0](#device-query-filter-deviceprop)
 
 <a name="Introduction"></a>
 # Introduction
@@ -25,6 +26,7 @@ Note that for csharp the snippets have to be modified to escape all the double q
 <a name="DeviceQueries"></a>
 # Device Queries
 
+<a name="device-query-filter-deviceprop"></a>
 **Device Query Filter over a Device Property**
 
 Get all devices where the FirmwareVersion Device property is set to 1.0

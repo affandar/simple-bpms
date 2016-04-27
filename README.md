@@ -17,6 +17,9 @@ Device Management Query Sample Snippets
  * [Filter over a Service property](#device-query-filter-serviceprop)
  * [Filter over a Service property with aggregates](#device-query-filter-serviceprop-aggregates)
  * [Order-by](#device-query-order-by)
+* [Device Job Queries](#DeviceJobQueries)
+ * [Filter jobs by status](#jobs-query-filter-status)
+ * [Order jobs by start time](#jobs-query-orderby)
 
 <a name="Introduction"></a>
 # Introduction
@@ -144,5 +147,43 @@ Return all devices ordered by the QoS Service property.
 }
 ```
 
-<a name="JobQueries"></a>
-# Job Queries
+<a name="DeviceJobQueries"></a>
+# Device Job Queries
+
+<a name="jobs-query-filter-status"></a>
+**Filter jobs by status**
+
+Get all device jobs where status of the job is set to Running.
+
+``` js
+{
+    "filter": {
+        "property": {
+            "name": "Status",
+            "type": "default"
+        },
+        "value": "Running",
+        "comparisonOperator": "eq",
+        "type": "comparison"
+    }
+}
+```
+
+<a name="jobs-query-orderby"></a>
+**Order jobs by start time**
+
+Get all device jobs ordered by StartTimeUtc
+
+``` js
+{
+    "sort": [
+        {
+            "property": {
+                "name": "StartTimeUtc",
+                "type": "default"
+            },
+            "order": "desc"
+        }
+    ]
+}
+```

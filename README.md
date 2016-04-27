@@ -12,7 +12,11 @@ Device Management Query Sample Snippets
 
 * [Introduction](#Introduction)
 * [Device Queries](#DeviceQueries)
- * [Get all devices where the FirmwareVersion Device property is set to 1.0](#device-query-filter-deviceprop)
+ * [Filter over a Device Property](#device-query-filter-deviceprop)
+ * [Filter over a Device property (not-equals)](#device-query-filter-deviceprop-ne)
+ * [Filter over a Service property](#device-query-filter-serviceprop)
+ * [Filter over a Service property with aggregates](#device-query-filter-serviceprop-aggregates)
+ * [Order-by](#device-query-order-by)
 
 <a name="Introduction"></a>
 # Introduction
@@ -27,7 +31,7 @@ Note that for csharp the snippets have to be modified to escape all the double q
 # Device Queries
 
 <a name="device-query-filter-deviceprop"></a>
-**Device Query Filter over a Device Property**
+**Filter over a Device Property**
 
 Get all devices where the FirmwareVersion Device property is set to 1.0
 
@@ -45,7 +49,8 @@ Get all devices where the FirmwareVersion Device property is set to 1.0
 }
 ```
 
-**Device Query Filter over a Device property (not-equals)**
+<a name="device-query-filter-deviceprop-ne"></a>
+**Filter over a Device property (not-equals)**
 
 Get all devices where the FirmwareVersion Device property is **not** set to 1.0
 
@@ -63,7 +68,8 @@ Get all devices where the FirmwareVersion Device property is **not** set to 1.0
 }
 ```
 
-**Device Query Filter over a Service property**
+<a name="device-query-filter-serviceprop"></a>
+**Filter over a Service property**
 
 Get all devices where CustomerId Service property is set to 123456
 
@@ -81,7 +87,8 @@ Get all devices where CustomerId Service property is set to 123456
 }
 ```
 
-**Device Query Filter over a Service property with aggregates**
+<a name="device-query-filter-serviceprop-aggregates"></a>
+**Filter over a Service property with aggregates**
 
 Group by the CustomerId Service prooperty and get sum of Weight Service property for all devices where CustomerId Service property is present. 
 
@@ -118,7 +125,8 @@ Group by the CustomerId Service prooperty and get sum of Weight Service property
 }
 ```
 
-**Device Query Order-by**
+<a name="device-query-order-by"></a>
+**Order-by**
 
 Return all devices ordered by the QoS Service property.
 
